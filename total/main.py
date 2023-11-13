@@ -35,6 +35,7 @@ class Player(pygame.sprite.Sprite):
         self.text=''
         self.voisin=''
         self.alex = False
+        self.gun = False
 
 
     def move(self):
@@ -70,15 +71,26 @@ class Player(pygame.sprite.Sprite):
             for npc in hit_npc:
                 self.voisin = npc.name
                 self.text = npc.dialogue
-                if self.text !='Vasyyyy' and self.voisin == 'Alexiano :':
+                if self.text !='Vasyyyy' and self.voisin == 'Madao :':
                     self.alex = True
+                if self.voisin != 'Madao :' and self.gun == True:
+                    self.text += '\n(appuie sur r pour tirer)'
+                    npc.dialogue = 'Ouille'   
             self.e_key_released = False
         if pressed_keys[K_r] and hit_npc and self.alex== True:
             for npc in hit_npc:
-                if npc.name == 'Alexiano :':
+                if npc.name == 'Madao :':
                     self.text = 'Merci! Prends ce gun'
                     npc.dialogue = 'Vasyyyy'   
-                    self.alex = False        
+                    self.alex = False     
+                    self.gun = True   
+        if pressed_keys[K_r] and hit_npc and self.gun== True:
+            for npc in hit_npc:
+                if npc.name != 'Madao :':
+                    self.text = 'BANG!'
+                    all_sprites.remove(npc)
+                    npcs.remove(npc)
+                    print("test3")
         if not pressed_keys[K_e] and not hit_npc and not self.e_key_released:
             self.e_key_released = True
             self.text = '' 
@@ -88,9 +100,9 @@ class Player(pygame.sprite.Sprite):
     
 
 class NPC(pygame.sprite.Sprite):
-    def __init__(self, x, y,name,dialogue) :
+    def __init__(self, x, y,name,dialogue,pathes) :
         super().__init__()
-        self.image = pygame.image.load('npc.png').convert_alpha()
+        self.image = pygame.image.load(pathes).convert_alpha()
         self.image = pygame.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -120,11 +132,11 @@ class house(pygame.sprite.Sprite):
 
 
 player = Player()
-npc1 = NPC(280,150,'John :','Je suis raciste')
-npc2 = NPC(280, 341,'Coco :', 'Je suis pas raciste')
+npc1 = NPC(280,150,'John :','Je suis raciste', 'npc.png')
+npc2 = NPC(280, 341,'Coco :', 'Je suis pas raciste', 'npc.png')
 npc3 = NPC_reverse(740,150, 'Olivier :', 'Je suis trop fort en info')
 npc4 = NPC_reverse(740,320, 'Martin :', 'Ptn mais qui est olivier')
-npc5 = NPC(280,553,'Alexiano :', 'Ils veulent pas la fermer?'+"\n"+'Tu veux pas les tuer pour moi?\n(press r to accept)')
+npc5 = NPC(280,553,'Madao :', 'Ils veulent pas la fermer?'+"\n"+'Tu veux pas les tuer pour moi?\n(press r to accept)','madao.png')
 house1 = house(140,87,'house2.png')
 house2 = house(140, 281,'house3.png')
 house3 = house(140, 490, 'house1.png')
