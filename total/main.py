@@ -36,6 +36,8 @@ class Player(pygame.sprite.Sprite):
         self.voisin=''
         self.alex = False
         self.gun = False
+        self.nb_voisin = 5
+        self.key = False
 
 
     def move(self):
@@ -52,8 +54,11 @@ class Player(pygame.sprite.Sprite):
             self.rect.x -= self.speed
         if pressed_keys[K_RIGHT] and self.rect.x + self.speed < WIDTH - self.rect.width:
             self.rect.x += self.speed
-        if pressed_keys[K_UP] and self.rect.y - self.speed > 0:
-            self.rect.y -= self.speed
+        if pressed_keys[K_UP] :
+            if self.rect.y -self.speed <0 and self.key and self.rect.x>400 and self.rect.x<550 :
+                self.rect.y += self.speed
+            if self.rect.y - self.speed > 0:
+                self.rect.y -= self.speed
         if pressed_keys[K_DOWN] and self.rect.y + self.speed < HEIGHT - self.rect.height:
             self.rect.y += self.speed
         hits = pygame.sprite.spritecollide(self, houses, False)
@@ -75,7 +80,10 @@ class Player(pygame.sprite.Sprite):
                     self.alex = True
                 if self.voisin != 'Madao :' and self.gun == True:
                     self.text += '\n(appuie sur r pour tirer)'
-                    npc.dialogue = 'Ouille'   
+                    npc.dialogue = 'Ouille' 
+                if self.voisin == 'Madao :' and self.nb_voisin ==1:
+                    self.text = 'Bv mon gars mais la suite existe pas'  
+                    self.key = True
             self.e_key_released = False
         if pressed_keys[K_r] and hit_npc and self.alex== True:
             for npc in hit_npc:
@@ -90,6 +98,7 @@ class Player(pygame.sprite.Sprite):
                     self.text = 'BANG!'
                     all_sprites.remove(npc)
                     npcs.remove(npc)
+                    self.nb_voisin -=1
                     print("test3")
         if not pressed_keys[K_e] and not hit_npc and not self.e_key_released:
             self.e_key_released = True
@@ -132,7 +141,7 @@ class house(pygame.sprite.Sprite):
 
 
 player = Player()
-npc1 = NPC(280,150,'John :','Je suis raciste', 'npc.png')
+npc1 = NPC(280,150,'Alexandre :','Je suis raciste', 'npc.png')
 npc2 = NPC(280, 341,'Coco :', 'Je suis pas raciste', 'npc.png')
 npc3 = NPC_reverse(740,150, 'Olivier :', 'Je suis trop fort en info')
 npc4 = NPC_reverse(740,320, 'Martin :', 'Ptn mais qui est olivier')
