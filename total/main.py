@@ -21,14 +21,37 @@ pygame.display.set_caption("Adventure Game")
 
 font = pygame.font.Font(None, 30)
 
-class Player(pygame.sprite.Sprite):
-    def __init__(self, x=483, y=0, speed=2):
+
+class game(pygame.sprite.Sprite):
+    def __init__(self):
         super().__init__()
-        self.image = pygame.image.load('steve.png').convert_alpha()
-        self.image = pygame.transform.scale(self.image, (50, 50))
+        self.tab_npc= [(280,150,'Alexandre :','Je suis raciste', 'npc.png'),
+                (280, 341,'Coco :', 'Je suis pas raciste', 'npc.png'),
+                (740,150, 'Olivier :', 'Je suis trop fort en info', 'npc_reverse.png'),
+                (740,320, 'Martin :', 'Ptn mais qui est olivier','npc_reverse.png'),
+                (280,553,'Madao :', 'Ils veulent pas la fermer?'+"\n"+'Tu veux pas les tuer pour moi?\n(press r to accept)','madao.png')]
+        self.tab_house = [(140,87,'house2.png'),
+                 (140, 281,'house3.png'),
+                 (140, 490, 'house1.png')
+    ]
+    def init_npc(self):
+        for i in range(5):
+            npc_number[i]= NPC(self.tab_npc[i])
+    
+class mySprite(pygame.sprite.Sprite):
+    def __init__(self,x,y,path):
+        super().__init__()
+        self.image = pygame.image.load(path).convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+
+
+class Player(mySprite):
+    def __init__(self,speed=2):
+        super().__init__(483,0,'steve.png')
+        self.image = pygame.transform.scale(self.image, (50, 50))
+        
         self.speed = speed
         self.basespeed = speed
         self.e_key_released = True
@@ -54,11 +77,8 @@ class Player(pygame.sprite.Sprite):
             self.rect.x -= self.speed
         if pressed_keys[K_RIGHT] and self.rect.x + self.speed < WIDTH - self.rect.width:
             self.rect.x += self.speed
-        if pressed_keys[K_UP] :
-            if self.rect.y -self.speed <0 and self.key and self.rect.x>400 and self.rect.x<550 :
-                self.rect.y += self.speed
-            if self.rect.y - self.speed > 0:
-                self.rect.y -= self.speed
+        if pressed_keys[K_UP] and self.rect.y -self.speed < 0:
+            self.rect.y -= self.speed
         if pressed_keys[K_DOWN] and self.rect.y + self.speed < HEIGHT - self.rect.height:
             self.rect.y += self.speed
         hits = pygame.sprite.spritecollide(self, houses, False)
@@ -108,43 +128,27 @@ class Player(pygame.sprite.Sprite):
 
     
 
-class NPC(pygame.sprite.Sprite):
-    def __init__(self, x, y,name,dialogue,pathes) :
-        super().__init__()
-        self.image = pygame.image.load(pathes).convert_alpha()
+class NPC(mySprite):
+    def __init__(self,x,y,name,dialogue,path) :
+        super().__init__(x,y,path)
         self.image = pygame.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self.name = name
-        self.dialogue = dialogue
-class NPC_reverse(pygame.sprite.Sprite):
-    def __init__(self, x, y,name,dialogue) :
-        super().__init__()
-        self.image = pygame.image.load('npc_reverse.png').convert_alpha()
-        self.image = pygame.transform.scale(self.image, (50, 50))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
         self.name = name
         self.dialogue = dialogue
 
-class house(pygame.sprite.Sprite):
-    def __init__(self,x,y,pathes):
-        super().__init__()
-        self.image = pygame.image.load(pathes).convert_alpha()
+class house(mySprite):
+    def __init__(self,x,y,path):
+        super().__init__(x,y,path)
         self.image = pygame.transform.scale(self.image, (160, 160))
         self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
 
 
 
 player = Player()
 npc1 = NPC(280,150,'Alexandre :','Je suis raciste', 'npc.png')
 npc2 = NPC(280, 341,'Coco :', 'Je suis pas raciste', 'npc.png')
-npc3 = NPC_reverse(740,150, 'Olivier :', 'Je suis trop fort en info')
-npc4 = NPC_reverse(740,320, 'Martin :', 'Ptn mais qui est olivier')
+npc3 = NPC(740,150, 'Olivier :', 'Je suis trop fort en info', 'npc_reverse.png')
+npc4 = NPC(740,320, 'Martin :', 'Ptn mais qui est olivier','npc_reverse.png')
 npc5 = NPC(280,553,'Madao :', 'Ils veulent pas la fermer?'+"\n"+'Tu veux pas les tuer pour moi?\n(press r to accept)','madao.png')
 house1 = house(140,87,'house2.png')
 house2 = house(140, 281,'house3.png')
