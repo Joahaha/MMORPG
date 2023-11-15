@@ -29,7 +29,7 @@ pygame.display.set_caption("Adventure Game")
 font = pygame.font.Font(None, 30)
 
 
-class game(pygame.sprite.Sprite):
+class Game(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.tab_npc= [[(280,150,'Alexandre :','Je suis raciste', 'npc.png'),
@@ -45,17 +45,18 @@ class game(pygame.sprite.Sprite):
         self.tab_house = [(140,87,'house2.png'),
                  (140, 281,'house3.png'),
                  (140, 490, 'house1.png')]
-        self.current_map = 1
-        
+        self.current_map = 0
         self.tab_npc_map1 = []
         self.tab_house_map1= []
         self.backgrounds = ['background_npc_town.png','winter.png']
         self.background = ''
+        self.init_player()
         self.init_house()
         self.init_npc()
         self.init_background()
+        self.init_game()
 
-    
+
     def init_npc(self):
         for i in range(5):
             self.tab_npc_map1.append(NPC(self.tab_npc[self.current_map][i][0],self.tab_npc[self.current_map][i][1],self.tab_npc[self.current_map][i][2],self.tab_npc[self.current_map][i][3],self.tab_npc[self.current_map][i][4]))
@@ -73,6 +74,31 @@ class game(pygame.sprite.Sprite):
         self.background= pygame.image.load(self.backgrounds[self.current_map])
 
 
+    def init_player(self):
+        self.player = Player(self)
+        all_sprites.add(self.player)
+
+    def init_game(self):
+        running = True
+
+        while running:
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    running = False
+            screen.blit(self.background, (0,0))
+            lines = f'{self.player.voisin} {self.player.text}'.split('\n')
+            text_surfaces = [font.render(line, True, (155, 0, 0)) for line in lines]
+
+            y = 700  
+            for text_surface in text_surfaces:
+                screen.blit(text_surface, (200, y))
+                y += text_surface.get_height() 
+
+            self.player.move()
+            for entity in all_sprites:
+                screen.blit(entity.image, entity.rect)
+            pygame.display.flip()
+
 class mySprite(pygame.sprite.Sprite):
     def __init__(self,x,y,path):
         super().__init__()
@@ -84,7 +110,7 @@ class mySprite(pygame.sprite.Sprite):
 
 
 class Player(mySprite):
-    def __init__(self,speed=4):
+    def __init__(self,game,speed=4):
         super().__init__(483,600,'steve.png')
         self.rect = self.image.get_rect()
         self.speed = speed
@@ -98,6 +124,7 @@ class Player(mySprite):
         self.key = False
         self.temp_x = 0
         self.temp_y = 0
+        self.game = game
 
 
     def move(self):
@@ -134,6 +161,7 @@ class Player(mySprite):
                 if self.voisin == 'Madao :' and self.nb_voisin ==1:
                     self.text = 'Bv mon gars mais la suite existe pas'  
                     self.key = True
+                    self.game.current_map = 1
             self.e_key_released = False
         if pressed_keys[K_r] and hit_npc and self.alex== True:
             for npc in hit_npc:
@@ -181,9 +209,11 @@ class Player(mySprite):
             self.rect.x = self.temp_x
             self.rect.y = self.temp_y
             
-
-player = Player()   
-all_sprites.add(player)
+    def update(self):
+        self.game.init_background()
+        self.game.init_house()
+        self.game.init_npc()
+        self.game.init_player()
 
 class NPC(mySprite):
     def __init__(self,x,y,name,dialogue,path) :
@@ -201,29 +231,5 @@ class house(mySprite):
 
 
 
-game = game()
+game = Game()
 
-
-
-text = player.text
-
-running = True
-
-while running:
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            running = False
-    screen.blit(game.background, (0,0))
-
-    lines = f'{player.voisin} {player.text}'.split('\n')
-    text_surfaces = [font.render(line, True, (155, 0, 0)) for line in lines]
-
-    y = 700  
-    for text_surface in text_surfaces:
-        screen.blit(text_surface, (200, y))
-        y += text_surface.get_height() 
-
-    player.move()
-    for entity in all_sprites:
-        screen.blit(entity.image, entity.rect)
-    pygame.display.flip()
