@@ -2,29 +2,9 @@ import pygame
 from pygame.locals import *
 from pygame.sprite import AbstractGroup
 
-
 pygame.init()
-vec = pygame.math.Vector2
 
-WIDTH, HEIGHT = 1000, 800
-FPS = 60
-
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-
-all_sprites = pygame.sprite.Group()
-
-
-npcs = pygame.sprite.Group()
-
-
-houses = pygame.sprite.Group()
-
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-
-
-
-pygame.display.set_caption("Adventure Game")
+pygame.display.set_caption("Joah adventure")
 
 font = pygame.font.Font(None, 30)
 
@@ -32,24 +12,35 @@ font = pygame.font.Font(None, 30)
 class Game(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.tab_npc= [[(280,150,'Alexandre :','Je suis raciste', 'npc.png'),
-                (280, 341,'Coco :', 'Je suis pas raciste', 'npc.png'),
-                (740,150, 'Olivier :', 'Je suis trop fort en info', 'npc_reverse.png'),
-                (740,320, 'Martin :', 'Ptn mais qui est olivier','npc_reverse.png'),
-                (280,553,'Madao :', 'Ils veulent pas la fermer?'+"\n"+'Tu veux pas les tuer pour moi?\n(press r to accept)','madao.png')],
-                [(280,150,'Bob :','Je suis gentil', 'npc.png'),
-                (280, 341,'Bobo :', 'Je suis pas gentil', 'npc.png'),
-                (740,150, 'Baba :', 'Je suis trop fort en sport', 'npc_reverse.png'),
-                (740,320, 'Fdp :', 'Ptn mais qui est bob','npc_reverse.png'),
-                (280,553,'dark_madao :', 'Ils veulent pas la fermer?'+"\n"+'Tu veux pas les manger pour moi?\n(press r to accept)','madao.png')]]
-        self.tab_house = [(140,87,'house2.png'),
-                 (140, 281,'house3.png'),
-                 (140, 490, 'house1.png')]
+        self.tab_npc= [((280,150,'Alexandre :','Je suis raciste', 'images/npc.png'),
+                (280, 341,'Coco :', 'Je suis pas raciste', 'images/npc.png'),
+                (740,150, 'Olivier :', 'Je suis trop fort en info', 'images/npc_reverse.png'),
+                (740,320, 'Martin :', 'Ptn mais qui est olivier','images/npc_reverse.png'),
+                (280,553,'Madao :', 'Ils veulent pas la fermer?'+"\n"+'Tu veux pas les tuer pour moi?\n(press r to accept)','images/madao.png')),
+                ((290,60,'Bob :','Je suis gentil', 'images/npc.png'),
+                (280, 341,'Bobo :', 'Je suis pas gentil', 'images/npc.png'),
+                (660,60, 'Baba :', 'Je suis trop fort en sport', 'images/npc_reverse.png'),
+                (740,320, 'Fdp :', 'Ptn mais qui est bob','images/npc_reverse.png'),
+                (280,553,'dark_madao :', 'Ils veulent pas la fermer?'+"\n"+'Tu veux pas les manger pour moi?\n(press r to accept)','images/madao.png'))]
+        self.tab_house = [((140,87,'images/house2.png'),
+                 (140, 281,'images/house3.png'),
+                 (140, 490, 'images/house1.png')),
+                 (())]
         self.current_map = 0
+        self.width = 1000
+        self.height = 800
+        self.screen = pygame.display.set_mode((self.width, self.height))
         self.tab_npc_map1 = []
         self.tab_house_map1= []
-        self.backgrounds = ['background_npc_town.png','winter.png']
+        self.backgrounds = ['images/background_npc_town.png','images/quatre_chemin.png','images/winter.png']
         self.background = ''
+        self.fps = 60
+        self.clock = pygame.time.Clock()
+        self.all_sprites = pygame.sprite.Group()
+        self.npcs = pygame.sprite.Group()
+        self.houses = pygame.sprite.Group()
+        self.nb_voisins = [5,5]
+        self.nb_maisons = [3,0]
         self.init_player()
         self.init_house()
         self.init_npc()
@@ -58,17 +49,28 @@ class Game(pygame.sprite.Sprite):
 
 
     def init_npc(self):
-        for i in range(5):
+        for i in range(self.nb_voisins[self.current_map]):
             self.tab_npc_map1.append(NPC(self.tab_npc[self.current_map][i][0],self.tab_npc[self.current_map][i][1],self.tab_npc[self.current_map][i][2],self.tab_npc[self.current_map][i][3],self.tab_npc[self.current_map][i][4]))
-            npcs.add(self.tab_npc_map1[i])
-            all_sprites.add(self.tab_npc_map1[i])
+            self.npcs.add(self.tab_npc_map1[i])
+            self.all_sprites.add(self.tab_npc_map1[i])
+
+    def clear_npc(self):
+        for i in range(self.nb_voisins[self.current_map]):
+            self.tab_npc_map1[i].kill() 
+        self.tab_npc_map1 = [] 
+
+    def clear_house(self):
+        for i in range(self.nb_maisons[self.current_map]):
+            self.tab_house_map1[i].kill() 
+        self.tab_house_map1 = []
+
     def init_house(self):
-        for i in range(3):
-            self.tab_house_map1.append(house(self.tab_house[i][0],self.tab_house[i][1],self.tab_house[i][2]))
-            houses.add(self.tab_house_map1[i])
-            all_sprites.add(self.tab_house_map1[i])
-            print(self.tab_house_map1[i].rect.x,self.tab_house_map1[i].rect.y)
-            print(self.tab_house[i][0],self.tab_house[i][1])
+        for i in range(self.nb_maisons[self.current_map]):
+            self.tab_house_map1.append(house(self.tab_house[self.current_map][i][0],self.tab_house[self.current_map][i][1],self.tab_house[self.current_map][i][2]))
+            self.houses.add(self.tab_house_map1[i])
+            self.all_sprites.add(self.tab_house_map1[i])
+
+        
 
     def init_background(self) :
         self.background= pygame.image.load(self.backgrounds[self.current_map])
@@ -76,27 +78,31 @@ class Game(pygame.sprite.Sprite):
 
     def init_player(self):
         self.player = Player(self)
-        all_sprites.add(self.player)
+        self.all_sprites.add(self.player)
 
     def init_game(self):
         running = True
 
         while running:
+            dt = self.clock.tick(self.fps)
             for event in pygame.event.get():
                 if event.type == QUIT:
                     running = False
-            screen.blit(self.background, (0,0))
+            self.screen.blit(self.background, (0,0))
             lines = f'{self.player.voisin} {self.player.text}'.split('\n')
             text_surfaces = [font.render(line, True, (155, 0, 0)) for line in lines]
 
             y = 700  
             for text_surface in text_surfaces:
-                screen.blit(text_surface, (200, y))
+                self.screen.blit(text_surface, (200, y))
                 y += text_surface.get_height() 
 
             self.player.move()
-            for entity in all_sprites:
-                screen.blit(entity.image, entity.rect)
+            for houses_nb in self.houses:
+                self.screen.blit(houses_nb.image, houses_nb.rect)
+            for npc_nb in self.npcs:
+                self.screen.blit(npc_nb.image, npc_nb.rect)
+            self.screen.blit(self.player.image, self.player.rect)
             pygame.display.flip()
 
 class mySprite(pygame.sprite.Sprite):
@@ -109,46 +115,41 @@ class mySprite(pygame.sprite.Sprite):
         self.rect.y = y
 
 
+
 class Player(mySprite):
-    def __init__(self,game,speed=4):
-        super().__init__(483,600,'steve.png')
+    def __init__(self,game,speed=10):
+        super().__init__(483,600,'images/steve.png')
         self.rect = self.image.get_rect()
         self.speed = speed
+        self.game = game
         self.basespeed = speed
         self.e_key_released = True
         self.text=''
         self.voisin=''
         self.alex = False
         self.gun = False
-        self.nb_voisin = 5
+        self.nb_voisin = self.game.nb_voisins[self.game.current_map]
         self.key = False
         self.temp_x = 0
         self.temp_y = 0
-        self.game = game
 
 
     def move(self):
-        hit_npc = pygame.sprite.spritecollide(self,npcs,False)
+        hit_npc = pygame.sprite.spritecollide(self,self.game.npcs,False)
 
         pressed_keys = pygame.key.get_pressed()
-        if pressed_keys[K_LSHIFT]:
-            if self.speed<=self.basespeed:
-                self.speed*=4
-            else:
-                self.speed/=4
         if pressed_keys[K_LEFT] and self.rect.x - self.speed > 0 :
             self.rect.x -= self.speed
             self.check_collision('x')
-        if pressed_keys[K_RIGHT] and self.rect.x + self.speed < WIDTH-50 :
+        if pressed_keys[K_RIGHT] and self.rect.x + self.speed < self.game.width-50 :
             self.rect.x += self.speed
             self.check_collision('x')
         if pressed_keys[K_UP]  and self.rect.y - self.speed > 0:  
             self.rect.y -= self.speed
             self.check_collision('y')
-        if pressed_keys[K_DOWN] and self.rect.y +self.speed < HEIGHT-50 :
+        if pressed_keys[K_DOWN] and self.rect.y +self.speed < self.game.height-50 :
             self.rect.y += self.speed
             self.check_collision('y')
-            print(self.rect.x,self.rect.y)
         if pressed_keys[K_e] and hit_npc and self.e_key_released:
             for npc in hit_npc:
                 self.voisin = npc.name
@@ -159,9 +160,12 @@ class Player(mySprite):
                     self.text += '\n(appuie sur r pour tirer)'
                     npc.dialogue = 'Ouille' 
                 if self.voisin == 'Madao :' and self.nb_voisin ==1:
-                    self.text = 'Bv mon gars mais la suite existe pas'  
-                    self.key = True
-                    self.game.current_map = 1
+                    if self.key == False:
+                        self.text = 'Bv mgl reviens me parler si tu veux changer de map'  
+                        self.key = True
+                    else:
+                           
+                        self.update()
             self.e_key_released = False
         if pressed_keys[K_r] and hit_npc and self.alex== True:
             for npc in hit_npc:
@@ -175,19 +179,18 @@ class Player(mySprite):
             for npc in hit_npc:
                 if npc.name != 'Madao :':
                     self.text = 'BANG!'
-                    all_sprites.remove(npc)
-                    npcs.remove(npc)
+                    self.game.all_sprites.remove(npc)
+                    self.game.npcs.remove(npc)
                     self.nb_voisin -=1
-                    print("test3")
+
         if not pressed_keys[K_e] and not hit_npc:
             self.e_key_released = True
             self.text = '' 
             self.voisin = ''
-            print("test4")
 
     def check_collision(self, direction):
 
-        hits = pygame.sprite.spritecollide(self, houses, False)
+        hits = pygame.sprite.spritecollide(self, self.game.houses, False)
         for hit in hits:
             if direction == 'x':
                 if self.rect.right > hit.rect.left and self.rect.left < hit.rect.left:
@@ -203,17 +206,30 @@ class Player(mySprite):
         if self.gun == True:
             self.temp_x = self.rect.x
             self.temp_y = self.rect.y
-            self.image = pygame.image.load('herobrine.png').convert_alpha()
+            self.image = pygame.image.load('images/herobrine.png').convert_alpha()
             self.image = pygame.transform.scale(self.image, (50, 50))
             self.rect = self.image.get_rect()
             self.rect.x = self.temp_x
             self.rect.y = self.temp_y
             
     def update(self):
+        self.game.clear_npc()
+        self.game.clear_house()
+        self.game.current_map+=1
         self.game.init_background()
         self.game.init_house()
         self.game.init_npc()
-        self.game.init_player()
+        self.default()
+    
+    def default(self):
+        self.e_key_released = True
+        self.text=''
+        self.voisin=''
+        self.alex = False
+        self.gun = False
+        self.nb_voisin = 5
+        self.key = False
+
 
 class NPC(mySprite):
     def __init__(self,x,y,name,dialogue,path) :
