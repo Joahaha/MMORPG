@@ -32,7 +32,7 @@ class Game(pygame.sprite.Sprite):
         self.screen = pygame.display.set_mode((self.width, self.height))
         self.tab_npc_map1 = []
         self.tab_house_map1= []
-        self.backgrounds = ['images/background_npc_town.png','images/quatre_chemin.png','images/winter.png']
+        self.backgrounds = ['images/background_npc_town.png','images/quatre_chemin.png','images/carre_riviere.png']
         self.background = ''
         self.fps = 60
         self.clock = pygame.time.Clock()
