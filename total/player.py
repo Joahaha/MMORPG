@@ -14,9 +14,11 @@ class Player(mySprite):
         self.game = game
         self.basespeed = speed
         self.e_key_released = True
+        self.go_next = True
         self.text=''
         self.voisin=''
-        self.alex = False
+        self.quest = False
+        self.on_going_quest = []
         self.gun = False
         self.nb_voisin = self.game.nb_voisins[self.game.current_map]
         self.key = False
@@ -26,7 +28,7 @@ class Player(mySprite):
 
     def move(self):
         hit_npc = pygame.sprite.spritecollide(self,self.game.npcs,False)
-        hit_waypoint = pygame.sprite.spritecollide(self.self.game.waypoints,False)
+        hit_waypoint = pygame.sprite.spritecollide(self, self.game.waypoints,False)
 
         pressed_keys = pygame.key.get_pressed()
         if pressed_keys[K_p]:
@@ -50,13 +52,17 @@ class Player(mySprite):
         if pressed_keys[K_e] and hit_npc and self.e_key_released:
             for npc in hit_npc:
                 self.interaction(npc)
+                pressed_keys2= pygame.key.get_pressed()
+            if npc.quest is not None and pressed_keys2[K_h]:
+                self.quest_screen(npc)
             self.e_key_released = False
-        if pressed_keys[K_e] and hit_waypoint: 
-            self.update()
-        
-
+        if pressed_keys[K_e] and hit_waypoint and self.e_key_released and self.go_next: 
+           self.e_key_released = False
+           self.update()
         if not hit_npc and not self.e_key_released:
+            self.reset_text()
             self.e_key_released = True
+        
 
 
     def check_collision(self, direction):
@@ -88,13 +94,12 @@ class Player(mySprite):
                 if self.rect.top < hit.rect.bottom and self.rect.bottom > hit.rect.bottom:
                     self.rect.top = hit.rect.bottom
 
-    def interaction(self,npc):
-        npc.actions()
-        npc.dialogue_next()
         
     def next_step(self,npc):
         npc.next_step()
 
+    def reset_text(self):
+        self.text = ''
     def is_herobrine(self):
         if self.gun == True:
             self.temp_x = self.rect.x
@@ -104,7 +109,40 @@ class Player(mySprite):
             self.rect = self.image.get_rect()
             self.rect.x = self.temp_x
             self.rect.y = self.temp_y
+
+    def start_quest(self):
+        self.quest = True
+        for npc in self.game.npcs:
+            if npc.killable:
+                self.next_step(npc)
+
+    def interaction(self, npc):
+        npc.actions()
+        npc.dialogue_next()
+
+
+    def quest_screen(self,npc):
+            self.text = "Do you want to accept the quest? (yes/no)"
+            self.game.screen.fill((0, 0, 0))
+            font = pygame.font.Font(None, 36)
             
+            text_surface = font.render(self.text, True, (255, 255, 255))
+            self.game.screen.blit(text_surface, (100, 350)) 
+            pygame.display.flip()
+
+            running = True
+            while running:
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_y:
+                            self.on_going_quest.append(npc.quest)
+                            npc.quest = None
+                            running = False
+                        elif event.key == pygame.K_n:
+                            running = False
+            self.text =''
+            npc.parler()
+
     def update(self):
         self.game.clear_npc()
         self.game.clear_house()
@@ -116,7 +154,7 @@ class Player(mySprite):
         self.default()
     
     def default(self):
-        self.e_key_released = True
+        self.go_next = False
         self.text=''
         self.voisin=''
         self.alex = False
