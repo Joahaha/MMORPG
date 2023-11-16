@@ -1,7 +1,7 @@
 import pygame
 from mysprite import mySprite
 
-class house(mySprite):
+class House(mySprite):
     def __init__(self,x,y,path):
         super().__init__(x,y,path)
         self.image = pygame.transform.scale(self.image, (160, 160))
