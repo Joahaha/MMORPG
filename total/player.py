@@ -26,6 +26,7 @@ class Player(mySprite):
 
     def move(self):
         hit_npc = pygame.sprite.spritecollide(self,self.game.npcs,False)
+        hit_waypoint = pygame.sprite.spritecollide(self.self.game.waypoints,False)
 
         pressed_keys = pygame.key.get_pressed()
         if pressed_keys[K_p]:
@@ -50,6 +51,8 @@ class Player(mySprite):
             for npc in hit_npc:
                 self.interaction(npc)
             self.e_key_released = False
+        if pressed_keys[K_e] and hit_waypoint: 
+            self.update()
         
 
         if not hit_npc and not self.e_key_released:
