@@ -7,6 +7,7 @@ from npc import NPC
 from house import House
 from wall_verti import Wall_verti
 from wall_hori import Wall_hori
+from waypoint import Waypoint
 
 pygame.init()
 
@@ -17,17 +18,17 @@ font = pygame.font.Font(None, 30)
 class Game(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.tab_npc= [((280,150,'Alexandre :','Je suis raciste', 'images/npc_good_1.png'),
-                (280, 341,'Coco :', 'Je suis pas raciste', 'images/npc_good_2.png'),
-                (740,150, 'Olivier :', 'Je suis trop fort en info', 'images/npc_good_3.png'),
-                (740,320, 'Martin :', 'Ptn mais qui est olivier','images/npc_good_4.png'),
-                (280,553,'Madao :', 'Ils veulent pas la fermer?'+"\n"+'Tu veux pas les tuer pour moi?\n(press r to accept)','images/npc_madao_2.png')),
+        self.tab_npc= [((280,150,'Alexandre :','Je suis raciste', 'images/npc_good_1.png',1,self,True),
+                (280, 341,'Coco :', 'Je suis pas raciste', 'images/npc_good_2.png',1,self,True),
+                (740,150, 'Olivier :', 'Je suis trop fort en info', 'images/npc_good_3.png',1,self,True),
+                (740,320, 'Martin :', 'Ptn mais qui est olivier','images/npc_good_4.png',1,self,True),
+                (280,553,'Madao :', 'Ils veulent pas la fermer?'+"\n"+'Tu veux pas les tuer pour moi?\n(press r to accept)','images/npc_madao_2.png',1,self,False)),
 
-                ((290,60,'Bob :','Je suis gentil', 'images/npc_bad_1.png'),
-                (280, 341,'Bobo :', 'Je suis pas gentil', 'images/npc_bad_2.png'),
-                (660,60, 'Baba :', 'Je suis trop fort en sport', 'images/npc_bad_3.png'),
-                (740,320, 'Fdp :', 'Ptn mais qui est bob','images/npc_bad_4.png'),
-                (280,553,'dark_madao :', 'Ils veulent pas la fermer?'+"\n"+'Tu veux pas les manger pour moi?\n(press r to accept)','images/npc_madao_1.png')),
+                ((290,60,'Bob :','Je suis gentil', 'images/npc_bad_1.png',1,self,True),
+                (280, 341,'Bobo :', 'Je suis pas gentil', 'images/npc_bad_2.png',1,self,True),
+                (660,60, 'Baba :', 'Je suis trop fort en sport', 'images/npc_bad_3.png',1,self,True),
+                (740,320, 'Fdp :', 'Ptn mais qui est bob','images/npc_bad_4.png',1,self,True),
+                (280,553,'dark_madao :', 'Ils veulent pas la fermer?'+"\n"+'Tu veux pas les manger pour moi?\n(press r to accept)','images/npc_madao_1.png',1,self,False)),
                 
                 (())
                 
@@ -54,6 +55,7 @@ class Game(pygame.sprite.Sprite):
         self.npcs = pygame.sprite.Group()
         self.houses = pygame.sprite.Group()
         self.all_walls = pygame.sprite.Group()
+        self.waypoints =''
         self.nb_voisins = [5,5,0]
         self.nb_maisons = [3,0,0]
         self.nb_walls = [0,2,0]
@@ -61,13 +63,21 @@ class Game(pygame.sprite.Sprite):
         self.init_house()
         self.init_npc()
         self.init_walls()
+        self.init_waypoint()
         self.init_background()
         self.init_game()
 
 
     def init_npc(self):
         for i in range(self.nb_voisins[self.current_map]):
-            self.tab_npc_map1.append(NPC(self.tab_npc[self.current_map][i][0],self.tab_npc[self.current_map][i][1],self.tab_npc[self.current_map][i][2],self.tab_npc[self.current_map][i][3],self.tab_npc[self.current_map][i][4]))
+            self.tab_npc_map1.append(NPC(self.tab_npc[self.current_map][i][0],
+                                         self.tab_npc[self.current_map][i][1],
+                                         self.tab_npc[self.current_map][i][2],
+                                         self.tab_npc[self.current_map][i][3],
+                                         self.tab_npc[self.current_map][i][4],
+                                         self.tab_npc[self.current_map][i][5],
+                                         self.tab_npc[self.current_map][i][6],
+                                         self.tab_npc[self.current_map][i][7]))
             self.npcs.add(self.tab_npc_map1[i])
             self.all_sprites.add(self.tab_npc_map1[i])
 
@@ -103,6 +113,9 @@ class Game(pygame.sprite.Sprite):
         self.background= pygame.image.load(self.backgrounds[self.current_map])
         self.background = pygame.transform.scale(self.background, (self.width, self.height))
 
+    def init_waypoint(self):
+        self.waypoints = Waypoint(400,700,'images/waypoint.png')
+
 
     def init_player(self):
         self.player = Player(self)
@@ -129,6 +142,7 @@ class Game(pygame.sprite.Sprite):
                 y += text_surface.get_height() 
 
             self.player.move()
+            self.screen.blit(self.waypoints.image, self.waypoints.rect)
             for houses_nb in self.houses:
                 self.screen.blit(houses_nb.image, houses_nb.rect)
             for npc_nb in self.npcs:

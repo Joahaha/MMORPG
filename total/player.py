@@ -48,41 +48,13 @@ class Player(mySprite):
             self.check_collision2('y')
         if pressed_keys[K_e] and hit_npc and self.e_key_released:
             for npc in hit_npc:
-                self.voisin = npc.name
-                self.text = npc.dialogue
-                if self.text !='Vasyyyy' and self.voisin == 'Madao :':
-                    self.alex = True
-                if self.voisin != 'Madao :' and self.gun == True:
-                    self.text += '\n(appuie sur r pour tirer)'
-                    npc.dialogue = 'Ouille' 
-                if self.voisin == 'Madao :' and self.nb_voisin ==1:
-                    if self.key == False:
-                        self.text = 'Bv mgl reviens me parler si tu veux changer de map'  
-                        self.key = True
-                    else:
-                           
-                        self.update()
+                self.interaction(npc)
             self.e_key_released = False
-        if pressed_keys[K_r] and hit_npc and self.alex== True:
-            for npc in hit_npc:
-                if npc.name == 'Madao :':
-                    self.text = 'Merci! Prends ce gun'
-                    npc.dialogue = 'Vasyyyy'   
-                    self.alex = False     
-                    self.gun = True   
-                    self.is_herobrine()
-        if pressed_keys[K_r] and hit_npc and self.gun== True:
-            for npc in hit_npc:
-                if npc.name != 'Madao :':
-                    self.text = 'BANG!'
-                    self.game.all_sprites.remove(npc)
-                    self.game.npcs.remove(npc)
-                    self.nb_voisin -=1
+        
 
-        if not pressed_keys[K_e] and not hit_npc:
+        if not hit_npc and not self.e_key_released:
             self.e_key_released = True
-            self.text = '' 
-            self.voisin = ''
+
 
     def check_collision(self, direction):
 
@@ -113,6 +85,12 @@ class Player(mySprite):
                 if self.rect.top < hit.rect.bottom and self.rect.bottom > hit.rect.bottom:
                     self.rect.top = hit.rect.bottom
 
+    def interaction(self,npc):
+        npc.actions()
+        npc.dialogue_next()
+        
+    def next_step(self,npc):
+        npc.next_step()
 
     def is_herobrine(self):
         if self.gun == True:
