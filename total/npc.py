@@ -12,7 +12,7 @@ class NPC(mySprite):
         self.dialogue = dialogue
         self.current_id = 0
         self.dialogue_id = 0
-        self.action = [self.parler, self.kill]  
+        self.action = [self.parler, self.kill,self.trade,self.sell]  
         self.quest=quest
         self.told_quest = False
 
@@ -33,7 +33,12 @@ class NPC(mySprite):
             self.game.all_sprites.remove(self)
             self.game.npcs.remove(self)
             self.game.player.nb_voisin -= 1
-        
+
+    def trade(self):
+        pass
+    
+    def sell(self):
+        pass
 
     def next_step(self):
         self.current_id += 1

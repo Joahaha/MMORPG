@@ -1,10 +1,14 @@
 class Quest:
-    def __init__(self, name, description, objectives, reward):
+    def __init__(self, name, description, objectives, reward,condition,post_text,holder,game_changer):
         self.name = name
         self.description = description
         self.objectives = objectives 
         self.reward = reward
+        self.condition = condition
         self.status = 'Not started'
+        self.post_text = post_text
+        self.holder = holder
+        self.game_changer = game_changer
 
     def start(self):
         self.status = 'In progress'

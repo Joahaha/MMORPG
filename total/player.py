@@ -4,10 +4,21 @@ from pygame.sprite import AbstractGroup
 from mysprite import mySprite
 
 class Player(mySprite):
-    def __init__(self,game,speed=10):
-        super().__init__(483,600,'images/steve.png')
-        self.image = pygame.transform.scale(self.image, (50, 50))
-        self.rect = self.image.get_rect()
+    def __init__(self,game,speed=4):
+        super().__init__(483,600,'images/mc_sprite_sheet.png')
+        self.frame_width = 64
+        self.frame_height = 53
+        self.current_direction ='up'
+        self.gap_height = 13
+        self.frames = {
+            'up': [self.image.subsurface(pygame.Rect(i * self.frame_width, 0 * (self.frame_height + self.gap_height)+self.gap_height-10, self.frame_width, self.frame_height)) for i in range(9)],
+            'left': [self.image.subsurface(pygame.Rect(i * self.frame_width, 1 * (self.frame_height + self.gap_height), self.frame_width, self.frame_height+10)) for i in range(9)],
+            'down': [self.image.subsurface(pygame.Rect(i * self.frame_width, 2 * (self.frame_height + self.gap_height), self.frame_width, self.frame_height)) for i in range(9)],
+            'right': [self.image.subsurface(pygame.Rect(i * self.frame_width, 3 * (self.frame_height + self.gap_height), self.frame_width, self.frame_height)) for i in range(9)],
+        }
+        self.rect = self.frames[self.current_direction][0].get_rect()
+        self.rect.width = 50
+        self.rect.height = 50
         self.rect.x = 483
         self.rect.y = 600
         self.speed = speed
@@ -24,6 +35,7 @@ class Player(mySprite):
         self.key = False
         self.temp_x = 0
         self.temp_y = 0
+        self.gold = 0
 
 
     def move(self):
@@ -35,20 +47,24 @@ class Player(mySprite):
             self.update()
         if pressed_keys[K_LEFT] and self.rect.x - self.speed > 0 :
             self.rect.x -= self.speed
-            self.check_collision('x')
-            self.check_collision2('x')
+            self.current_direction = 'left'
+            self.check_collision('x', self.game.houses)
+            self.check_collision('x', self.game.all_walls)
         if pressed_keys[K_RIGHT] and self.rect.x + self.speed < self.game.width-50 :
             self.rect.x += self.speed
-            self.check_collision('x')
-            self.check_collision2('x')
+            self.current_direction = 'right'
+            self.check_collision('x', self.game.houses)
+            self.check_collision('x', self.game.all_walls)
         if pressed_keys[K_UP]  and self.rect.y - self.speed > 0:  
             self.rect.y -= self.speed
-            self.check_collision('y')
-            self.check_collision2('y')
+            self.current_direction = 'up'
+            self.check_collision('y', self.game.houses)
+            self.check_collision('y', self.game.all_walls)
         if pressed_keys[K_DOWN] and self.rect.y +self.speed < self.game.height-50 :
             self.rect.y += self.speed
-            self.check_collision('y')
-            self.check_collision2('y')
+            self.current_direction = 'down'
+            self.check_collision('y', self.game.houses)
+            self.check_collision('y', self.game.all_walls)
         if pressed_keys[K_e] and hit_npc and self.e_key_released:
             for npc in hit_npc:
                 self.interaction(npc)
@@ -65,32 +81,18 @@ class Player(mySprite):
                     self.quest_screen(npc)
 
         if pressed_keys[K_e] and hit_waypoint and self.e_key_released and self.go_next: 
-           self.e_key_released = False
-           self.update()
+           for waypoint in hit_waypoint:
+               if waypoint.avaiable:
+                    self.e_key_released = False
+                    self.update()
         if not hit_npc and not self.e_key_released:
             self.reset_text()
             self.e_key_released = True
             self.quest = False
         
 
-
-    def check_collision(self, direction):
-
-        hits = pygame.sprite.spritecollide(self, self.game.houses, False)
-        for hit in hits:
-            if direction == 'x':
-                if self.rect.right > hit.rect.left and self.rect.left < hit.rect.left:
-                    self.rect.right = hit.rect.left
-                if self.rect.left < hit.rect.right and self.rect.right > hit.rect.right:
-                    self.rect.left = hit.rect.right
-            else:
-                if self.rect.bottom > hit.rect.top and self.rect.top < hit.rect.top:
-                    self.rect.bottom = hit.rect.top
-                if self.rect.top < hit.rect.bottom and self.rect.bottom > hit.rect.bottom:
-                    self.rect.top = hit.rect.bottom
-
-    def check_collision2(self, direction):
-        hits = pygame.sprite.spritecollide(self, self.game.all_walls, False)
+    def check_collision(self, direction, sprite_group):
+        hits = pygame.sprite.spritecollide(self, sprite_group, False)
         for hit in hits:
             if direction == 'x':
                 if self.rect.right > hit.rect.left and self.rect.left < hit.rect.left:
@@ -130,38 +132,27 @@ class Player(mySprite):
         npc.actions()
         npc.dialogue_next()
 
+    def end_of_quest(self,quest):
+        for i in range (quest.holder.max_dialogue):
+            quest.holder.dialogue[i] = quest.post_text
+        quest.holder.quest = None
+        if quest.game_changer:
+            for waypoint in self.game.waypoints:
+                waypoint.avaiable = True
+        self.on_going_quest.remove(quest)
 
-    def quest_screen(self,npc):
-            self.text = "Do you want to accept the quest? (yes/no)"
-            self.game.screen.fill((0, 0, 0))
-            font = pygame.font.Font(None, 36)
-            
-            background_image = pygame.image.load('images/background_1.png')
-            self.game.screen.blit(background_image, (0, 0))
-            text_surface = font.render(self.text, True, (155, 0, 0))
-            self.game.screen.blit(text_surface, (100, 350))
-            pygame.display.flip()
+    def is_end_end(self):
+        for quests in self.on_going_quest:
+            if quests.condition:
+                self.end_of_quest(quests)
 
-            running = True
-            while running:
-                for event in pygame.event.get():
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_y:
-                            npc.quest.start()
-                            
-                            self.on_going_quest.append(npc.quest)
-                        
-                            for each_npc in self.game.npcs:
-                                if each_npc.quest == None:
-                                    self.next_step(each_npc)
-                            running = False
-                        elif event.key == pygame.K_n:
-                            running = False
-            self.text =''
     def show_quest(self,npc):
         self.text = self.voisin 
         self.text += "\nQuête : " + npc.quest.name
         self.text += "\n" + npc.quest.description
+        self.text += "\n-Press space to exit"
+        if npc.quest.status == 'Not started':
+            self.text += "\n-Press y to accept"
         lines = f'{self.voisin} {self.text}'.split('\n')
         background_image = pygame.image.load('images/background_1.png')
         self.game.screen.blit(background_image, (0, 0))
@@ -177,14 +168,19 @@ class Player(mySprite):
         running = True
         while running:
             for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_y:
-                        self.text = npc.quest.description
+                if event.type == pygame.KEYDOWN:  # Check if a key was pressed
+                    if event.key == pygame.K_SPACE:
                         running = False
-                    elif event.key == pygame.K_n:
+                    elif event.key == pygame.K_y:
+                        npc.quest.start()    
+                        self.on_going_quest.append(npc.quest)
+                            
+                        for each_npc in self.game.npcs:
+                            if each_npc.quest == None:
+                                self.next_step(each_npc)
                         running = False
-        self.text =''
-
+        self.text = ''
+        npc.actions()
     def update(self):
         self.game.clear_npc()
         self.game.clear_house()
@@ -203,3 +199,4 @@ class Player(mySprite):
         self.gun = False
         self.nb_voisin = 5
         self.key = False
+        self.quest = False
