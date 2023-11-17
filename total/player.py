@@ -52,16 +52,25 @@ class Player(mySprite):
         if pressed_keys[K_e] and hit_npc and self.e_key_released:
             for npc in hit_npc:
                 self.interaction(npc)
-                pressed_keys2= pygame.key.get_pressed()
-            if npc.quest is not None and pressed_keys2[K_h]:
-                self.quest_screen(npc)
             self.e_key_released = False
+
+        if pressed_keys[K_q] and self.quest == True  :
+            for npc in hit_npc:
+                if npc.quest is not None :
+                    self.show_quest(npc)
+                    npc.told_quest = True
+        if pressed_keys[K_h]:
+            for npc in hit_npc:
+                if npc.quest is not None and npc.told_quest == True and npc.quest.status == 'Not started':
+                    self.quest_screen(npc)
+
         if pressed_keys[K_e] and hit_waypoint and self.e_key_released and self.go_next: 
            self.e_key_released = False
            self.update()
         if not hit_npc and not self.e_key_released:
             self.reset_text()
             self.e_key_released = True
+            self.quest = False
         
 
 
@@ -100,6 +109,7 @@ class Player(mySprite):
 
     def reset_text(self):
         self.text = ''
+
     def is_herobrine(self):
         if self.gun == True:
             self.temp_x = self.rect.x
@@ -126,8 +136,10 @@ class Player(mySprite):
             self.game.screen.fill((0, 0, 0))
             font = pygame.font.Font(None, 36)
             
-            text_surface = font.render(self.text, True, (255, 255, 255))
-            self.game.screen.blit(text_surface, (100, 350)) 
+            background_image = pygame.image.load('images/background_1.png')
+            self.game.screen.blit(background_image, (0, 0))
+            text_surface = font.render(self.text, True, (155, 0, 0))
+            self.game.screen.blit(text_surface, (100, 350))
             pygame.display.flip()
 
             running = True
@@ -135,13 +147,43 @@ class Player(mySprite):
                 for event in pygame.event.get():
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_y:
+                            npc.quest.start()
+                            
                             self.on_going_quest.append(npc.quest)
-                            npc.quest = None
+                        
+                            for each_npc in self.game.npcs:
+                                if each_npc.quest == None:
+                                    self.next_step(each_npc)
                             running = False
                         elif event.key == pygame.K_n:
                             running = False
             self.text =''
-            npc.parler()
+    def show_quest(self,npc):
+        self.text = self.voisin 
+        self.text += "\nQuête : " + npc.quest.name
+        self.text += "\n" + npc.quest.description
+        lines = f'{self.voisin} {self.text}'.split('\n')
+        background_image = pygame.image.load('images/background_1.png')
+        self.game.screen.blit(background_image, (0, 0))
+        font = pygame.font.Font(None, 36)
+        npc.told_quest = True
+        text_surfaces = [font.render(line, True, (155, 0, 0)) for line in lines]
+
+        for i, text_surface in enumerate(text_surfaces):
+            self.game.screen.blit(text_surface, (100, 350 + i*40)) 
+
+        pygame.display.flip()
+
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_y:
+                        self.text = npc.quest.description
+                        running = False
+                    elif event.key == pygame.K_n:
+                        running = False
+        self.text =''
 
     def update(self):
         self.game.clear_npc()

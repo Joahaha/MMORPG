@@ -14,6 +14,7 @@ class NPC(mySprite):
         self.dialogue_id = 0
         self.action = [self.parler, self.kill]  
         self.quest=quest
+        self.told_quest = False
 
     def actions(self):
         self.action[self.current_id]()
@@ -23,9 +24,8 @@ class NPC(mySprite):
             self.dialogue_id = 0
         self.game.player.text += self.name
         if self.quest is not None:
-            self.game.player.text += "\nQuest available: " + self.quest.name
-        else :
-            self.game.player.text += self.dialogue [self.dialogue_id]
+            self.game.player.quest = True
+        self.game.player.text += self.dialogue [self.dialogue_id]
 
 
     def kill(self):
@@ -37,8 +37,6 @@ class NPC(mySprite):
 
     def next_step(self):
         self.current_id += 1
-        if self.current_id >= len(self.action):
-            self.current_id = 0
 
     def dialogue_next(self):
         self.dialogue_id+=1

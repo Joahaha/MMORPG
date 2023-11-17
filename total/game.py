@@ -25,11 +25,11 @@ class Game(pygame.sprite.Sprite):
                             objectives=['Tuer tout le monde', 'Reparler à Madao après'],
                             reward='50 gold coins')
         
-        self.tab_npc= [((280,150,'Alexandre',['\nJe suis raciste','Je suis vraiment raciste'], 'images/npc_good_2.png',2,self,True,None),
+        self.tab_npc= [((280,150,'Alexandre',['\nJe suis raciste','\nJe suis vraiment raciste'], 'images/npc_good_2.png',2,self,True,None),
                 (280, 341,'Coco', ['\nJe suis pas raciste'], 'images/npc_good_1.png',1,self,True,None),
                 (740,150, 'Olivier', ['\nJe suis trop fort en info'], 'images/npc_good_3.png',1,self,True,None),
                 (740,320, 'Martin', ['\nPtn mais qui est olivier'],'images/npc_good_4.png',1,self,True,None),
-                (280,553,'Madao', ['\nIls veulent pas la fermer?'+"\n"+'Tu veux pas les tuer pour moi?\n(press r to accept)'],'images/npc_madao_2.png',1,self,False,self.quest)),
+                (280,553,'Madao', ['\nIls veulent pas la fermer?'+"\n"+'Tu veux pas les tuer pour moi?\n'],'images/npc_madao_2.png',1,self,False,self.quest)),
 
                 ((290,60,'Bob',['Je suis gentil'], 'images/npc_bad_1.png',1,self,True),
                 (280, 341,'Bobo',[ 'Je suis pas gentil'], 'images/npc_bad_2.png',1,self,True),
