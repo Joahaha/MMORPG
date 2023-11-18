@@ -26,7 +26,7 @@ class Game(pygame.sprite.Sprite):
                             holder = NPC,
                             game_changer = True)
         
-        self.tab_npc= [((300,200,'Alexandre',['\nJe suis raciste','\nJe suis vraiment raciste'], 'images/npc_good_2.png',2,self,True,None),
+        self.tab_npc= [((300,240,'Alexandre',['\nJe suis raciste','\nJe suis vraiment raciste'], 'images/npc_good_2.png',2,self,True,None),
                 (300, 341,'Coco', ['\nJe suis pas raciste'], 'images/npc_good_1.png',1,self,True,None),
                 (740,150, 'Olivier', ['\nJe suis trop fort en info'], 'images/npc_good_3.png',1,self,True,None),
                 (740,420, 'Martin', ['\nPtn mais qui est olivier'],'images/npc_good_4.png',1,self,True,None),
@@ -52,8 +52,12 @@ class Game(pygame.sprite.Sprite):
         self.tab_house_map = [[] for _ in range(len(self.tab_house))]
         self.backgrounds = ['images/background_npc_town.png','images/house_inside.png','images/carte_riviere.png','images/quatre_chemin.png']
         self.background = ''
-        self.walls_verti = [(0,0,''),(320, 30,'images/wall.png'),(0,0,'images/border.png')]
-        self.walls_hori = [(0,0,''),(215,255,'images/wall.png'),(0,0,'images/border.png')]
+        self.walls_verti = [(()),
+                            ((320, 30,'images/wall.png',10,220),(320, 30,'images/wall.png',10,220)),
+                            (0,0,'images/border.png')]
+        self.walls_hori = [(()),
+                           ((215,255,'images/wall.png',650,10),(215,255,'images/wall.png',650,10)),
+                           (0,0,'images/border.png')]
         self.wall_per_map_hori = []
         self.wall_per_map_verti = []
 
@@ -117,8 +121,17 @@ class Game(pygame.sprite.Sprite):
 
     def init_walls(self):
         for i in range(self.nb_walls[self.current_map]):
-            self.wall_per_map_verti.append(Wall_verti(self.walls_verti[self.current_map][0],self.walls_verti[self.current_map][1],self.walls_verti[self.current_map][2]))
-            self.wall_per_map_hori.append (Wall_hori(self.walls_hori[self.current_map][0],self.walls_hori[self.current_map][1],self.walls_hori[self.current_map][2]))
+            self.wall_per_map_verti.append(Wall_verti(self.walls_verti[self.current_map][i][0],
+                                                      self.walls_verti[self.current_map][i][1],
+                                                      self.walls_verti[self.current_map][i][2],
+                                                      self.walls_verti[self.current_map][i][3],
+                                                      self.walls_verti[self.current_map][i][4]))
+            
+            self.wall_per_map_hori.append (Wall_hori(self.walls_hori[self.current_map][i][0],
+                                                     self.walls_hori[self.current_map][i][1],
+                                                     self.walls_hori[self.current_map][i][2],
+                                                     self.walls_hori[self.current_map][i][3],
+                                                     self.walls_hori[self.current_map][i][4]))
             
             self.all_walls.add(self.wall_per_map_verti[i])
             self.all_walls.add(self.wall_per_map_hori[i])
