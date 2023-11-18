@@ -4,17 +4,18 @@ from pygame.sprite import AbstractGroup
 from mysprite import mySprite
 
 class Player(mySprite):
-    def __init__(self,game,speed=4):
+    def __init__(self,game,speed=6):
         super().__init__(483,600,'images/mc_sprite_sheet.png')
         self.frame_width = 64
         self.frame_height = 53
-        self.current_direction ='up'
+        self.current_direction ='standing'
         self.gap_height = 13
         self.frames = {
-            'up': [self.image.subsurface(pygame.Rect(i * self.frame_width, 0 * (self.frame_height + self.gap_height)+self.gap_height-10, self.frame_width, self.frame_height)) for i in range(9)],
+            'up': [self.image.subsurface(pygame.Rect(i * self.frame_width, 0 * (self.frame_height + self.gap_height)+self.gap_height-8, self.frame_width, self.frame_height)) for i in range(9)],
             'left': [self.image.subsurface(pygame.Rect(i * self.frame_width, 1 * (self.frame_height + self.gap_height), self.frame_width, self.frame_height+10)) for i in range(9)],
             'down': [self.image.subsurface(pygame.Rect(i * self.frame_width, 2 * (self.frame_height + self.gap_height), self.frame_width, self.frame_height)) for i in range(9)],
             'right': [self.image.subsurface(pygame.Rect(i * self.frame_width, 3 * (self.frame_height + self.gap_height), self.frame_width, self.frame_height)) for i in range(9)],
+            'standing':[self.image.subsurface(pygame.Rect( self.frame_width, 2 * (self.frame_height + self.gap_height), self.frame_width, self.frame_height)) for i in range(9)],
         }
         self.rect = self.frames[self.current_direction][0].get_rect()
         self.rect.width = 50
@@ -43,6 +44,9 @@ class Player(mySprite):
         hit_waypoint = pygame.sprite.spritecollide(self, self.game.waypoints,False)
 
         pressed_keys = pygame.key.get_pressed()
+        if hit_npc:
+            for npc in hit_npc:
+                self.show_interaction(npc)
         if pressed_keys[K_p]:
             self.update()
         if pressed_keys[K_LEFT] and self.rect.x - self.speed > 0 :
@@ -74,7 +78,6 @@ class Player(mySprite):
             for npc in hit_npc:
                 if npc.quest is not None :
                     self.show_quest(npc)
-                    npc.told_quest = True
         if pressed_keys[K_h]:
             for npc in hit_npc:
                 if npc.quest is not None and npc.told_quest == True and npc.quest.status == 'Not started':
@@ -88,7 +91,8 @@ class Player(mySprite):
         if not hit_npc and not self.e_key_released:
             self.reset_text()
             self.e_key_released = True
-            self.quest = False
+        if not (pressed_keys[K_LEFT] or pressed_keys[K_RIGHT] or pressed_keys[K_UP] or pressed_keys[K_DOWN]):
+            self.current_direction = 'standing'
         
 
     def check_collision(self, direction, sprite_group):
@@ -105,7 +109,22 @@ class Player(mySprite):
                 if self.rect.top < hit.rect.bottom and self.rect.bottom > hit.rect.bottom:
                     self.rect.top = hit.rect.bottom
 
+    def show_interaction(self,npc):
+        npc.show_interaction()
+        self.show_npc_text(npc)
+
+    def show_npc_text(self,npc):
+        font = pygame.font.Font(None, 20)
         
+        x = npc.rect.x -10
+        lines = f'{npc.possible_interaction}'.split('\n')
+        y= npc.rect.y -(20*len(lines))
+        text_surfaces = [font.render(line, True, (255, 255, 255)) for line in lines]
+        for text_surface in text_surfaces:
+            self.game.screen.blit(text_surface, (x, y))
+            y += text_surface.get_height() 
+
+
     def next_step(self,npc):
         npc.next_step()
 
@@ -130,6 +149,7 @@ class Player(mySprite):
 
     def interaction(self, npc):
         npc.actions()
+        npc.talk_sound.play()
         npc.dialogue_next()
 
     def end_of_quest(self,quest):
@@ -139,11 +159,13 @@ class Player(mySprite):
         if quest.game_changer:
             for waypoint in self.game.waypoints:
                 waypoint.avaiable = True
+                self.gold += self.quest.reward
         self.on_going_quest.remove(quest)
 
     def is_end_end(self):
+        
         for quests in self.on_going_quest:
-            if quests.condition:
+            if quests.condition():
                 self.end_of_quest(quests)
 
     def show_quest(self,npc):
@@ -154,21 +176,21 @@ class Player(mySprite):
         if npc.quest.status == 'Not started':
             self.text += "\n-Press y to accept"
         lines = f'{self.voisin} {self.text}'.split('\n')
-        background_image = pygame.image.load('images/background_1.png')
+        background_image = pygame.image.load(self.game.backgrounds[self.game.current_map])
+        background_image = pygame.transform.scale(background_image,(1000,800))
         self.game.screen.blit(background_image, (0, 0))
         font = pygame.font.Font(None, 36)
         npc.told_quest = True
-        text_surfaces = [font.render(line, True, (155, 0, 0)) for line in lines]
+        text_surfaces = [font.render(line, True, (255, 255, 255)) for line in lines]
 
         for i, text_surface in enumerate(text_surfaces):
-            self.game.screen.blit(text_surface, (100, 350 + i*40)) 
-
+            self.game.screen.blit(text_surface, (100, 200 + i*40)) 
         pygame.display.flip()
 
         running = True
         while running:
             for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:  # Check if a key was pressed
+                if event.type == pygame.KEYDOWN:  
                     if event.key == pygame.K_SPACE:
                         running = False
                     elif event.key == pygame.K_y:
@@ -180,7 +202,19 @@ class Player(mySprite):
                                 self.next_step(each_npc)
                         running = False
         self.text = ''
-        npc.actions()
+
+
+    def show_text(self):
+            font = pygame.font.Font(None, 24)
+            y= 700
+            lines = f'{self.voisin} {self.text}'.split('\n')
+            text_surfaces = [font.render(line, True, (240, 240, 240)) for line in lines]
+            for text_surface in text_surfaces:
+                self.game.screen.blit(text_surface, (200, y))
+                y += text_surface.get_height() 
+
+ 
+
     def update(self):
         self.game.clear_npc()
         self.game.clear_house()

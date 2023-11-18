@@ -16,27 +16,29 @@ font = pygame.font.Font(None, 30)
 
 class Game(pygame.sprite.Sprite):
     def __init__(self):
+        self.background_music = ['sounds/pokemon_ost_1.mp3','sounds/pokemon_ost_1.mp3','sounds/pokemon_ost_1.mp3']
+        self.npc_sounds = ['sounds/npc_talk_1.mp3','sounds/npc_talk_2.mp3','sounds/npc_talk_3.mp3']
         self.quest= Quest(
                             name ='Kill everybody',
                             description='Madao en a marre. Il veut que tu tues tout le monde',
                             objectives=['Tuer tout le monde', 'Reparler à Madao après'],
-                            reward='50 gold coins',
-                            condition = True,
+                            reward= 50,
+                            condition = False,
                             post_text = '\nMerci tu peux prendre le téléporteur pour changer de map',
                             holder = NPC,
                             game_changer = True)
         
-        self.tab_npc= [((300,240,'Alexandre',['\nJe suis raciste','\nJe suis vraiment raciste'], 'images/npc_good_2.png',2,self,True,None),
-                (300, 341,'Coco', ['\nJe suis pas raciste'], 'images/npc_good_1.png',1,self,True,None),
-                (740,150, 'Olivier', ['\nJe suis trop fort en info'], 'images/npc_good_3.png',1,self,True,None),
-                (740,420, 'Martin', ['\nPtn mais qui est olivier'],'images/npc_good_4.png',1,self,True,None),
-                (300,553,'Madao', ['\nIls veulent pas la fermer?'+"\n"+'Tu veux pas les tuer pour moi?\n'],'images/npc_madao_2.png',1,self,False,self.quest)),
+        self.tab_npc= [((300,240,'Alexandre',['\nJe suis raciste','\nJe suis vraiment raciste','\nJe suis le plus raciste'], 'images/npc_good_2.png',3,self,True,None,self.npc_sounds[1]),
+                (300, 370,'Coco', ['\nJe suis pas raciste'], 'images/npc_good_1.png',1,self,True,None,self.npc_sounds[1]),
+                (740,150, 'Olivier', ['\nJe suis trop fort en info'], 'images/npc_good_3.png',1,self,True,None,self.npc_sounds[1]),
+                (740,450, 'Martin', ['\nPtn mais qui est olivier'],'images/npc_good_4.png',1,self,True,None,self.npc_sounds[1]),
+                (400,600,'Madao', ['\nIls veulent pas la fermer?'+"\n"],'images/npc_madao_2.png',1,self,False,self.quest,self.npc_sounds[2])),
 
-                ((290,60,'Bob',['\nJe suis gentil'], 'images/npc_bad_1.png',1,self,True,None),
-                (280, 341,'Bobo',[ '\nJe suis pas gentil'], 'images/npc_bad_2.png',1,self,True,None),
-                (660,60, 'Baba :', ['\nJe suis trop fort en sport'], 'images/npc_bad_3.png',1,self,True,None),
-                (740,320, 'Fdp :', ['\nPtn mais qui est bob'],'images/npc_bad_4.png',1,self,True,None),
-                (280,553,'dark_madao :', ['\nYo la team tu veux quoi frr'],'images/npc_madao_1.png',1,self,True,None)),
+                ((290,60,'Bob',['\nJe suis gentil'], 'images/npc_bad_1.png',1,self,True,None,self.npc_sounds[1]),
+                (280, 341,'Bobo',[ '\nJe suis pas gentil'], 'images/npc_bad_2.png',1,self,True,None,self.npc_sounds[1]),
+                (660,60, 'Baba :', ['\nJe suis trop fort en sport'], 'images/npc_bad_3.png',1,self,True,None,self.npc_sounds[1]),
+                (740,320, 'Fdp :', ['\nPtn mais qui est bob'],'images/npc_bad_4.png',1,self,True,None,self.npc_sounds[1]),
+                (280,553,'dark_madao :', ['\nYo la team tu veux quoi frr'],'images/npc_madao_1.png',1,self,True,None,self.npc_sounds[1])),
                 (())
                 ]
         self.tab_house = [((140,87,'images/house1.png'),
@@ -96,10 +98,14 @@ class Game(pygame.sprite.Sprite):
                                          self.tab_npc[self.current_map][i][5],
                                          self.tab_npc[self.current_map][i][6],
                                          self.tab_npc[self.current_map][i][7],
-                                         self.tab_npc[self.current_map][i][8]
+                                         self.tab_npc[self.current_map][i][8],
+                                         pygame.mixer.Sound(self.tab_npc[self.current_map][i][9])
                                          ))
             self.npcs.add(self.tab_npc_map[self.current_map][i])
             self.all_sprites.add(self.tab_npc_map[self.current_map][i])
+    def init_npc_per_map(self):
+        for npc_nb in self.npcs:
+                self.screen.blit(npc_nb.image, npc_nb.rect)
 
     def clear_npc(self):
         for npc in self.tab_npc_map[self.current_map]:
@@ -118,6 +124,9 @@ class Game(pygame.sprite.Sprite):
                                                                self.tab_house[self.current_map][i][2])))
             self.houses.add(self.tab_house_map[self.current_map][i])
             self.all_sprites.add(self.tab_house_map[self.current_map][i])
+    def init_house_per_map(self):
+        for houses_nb in self.houses:
+                self.screen.blit(houses_nb.image, houses_nb.rect)
 
     def init_walls(self):
         for i in range(self.nb_walls[self.current_map]):
@@ -138,6 +147,10 @@ class Game(pygame.sprite.Sprite):
             self.all_sprites.add(self.wall_per_map_hori[i])
             self.all_sprites.add(self.wall_per_map_verti[i])
 
+    def init_walls_per_map(self):
+        for walls in self.all_walls:
+            self.screen.blit(walls.image, walls.rect)
+
     def init_background(self) :
         self.background= pygame.image.load(self.backgrounds[self.current_map])
         self.background = pygame.transform.scale(self.background, (self.width, self.height))
@@ -145,44 +158,44 @@ class Game(pygame.sprite.Sprite):
     def init_waypoint(self):
         self.waypoints.add(Waypoint(400,700,'images/waypoint.png'))
 
+    def init_waypoint_per_map(self):
+        for waypoints in self.waypoints:
+            self.screen.blit(waypoints.image, waypoints.rect)
 
     def init_player(self):
         self.player = Player(self)
         self.all_sprites.add(self.player)
 
+    def show_player(self):
+            self.frame_counter = (self.frame_counter + 1) % (self.fps//5)
+            self.screen.blit(self.player.frames[self.player.current_direction][self.current_frame], (self.player.rect.x, self.player.rect.y))
+
+            if self.frame_counter == 0:
+                self.current_frame = (self.current_frame + 1) % 9
+    def init_music(self):
+        pygame.mixer.init()
+        pygame.mixer.music.load(self.background_music[self.current_map])
+        pygame.mixer.music.play(-1) 
     def init_game(self):
         running = True
-
+        self.init_music()
         while running:
-            self.frame_counter = (self.frame_counter + 1) % (self.fps//5)
             
             dt = self.clock.tick(self.fps)
             for event in pygame.event.get():
                 if event.type == QUIT:
                     running = False
-            for walls in self.all_walls:
-                self.screen.blit(walls.image, walls.rect)
-            self.screen.blit(self.background, (0,0))
             
-            lines = f'{self.player.voisin} {self.player.text}'.split('\n')
-            text_surfaces = [font.render(line, True, (155, 0, 0)) for line in lines]
+            self.init_walls_per_map()
+            self.screen.blit(self.background, (0,0))
+             
+            self.init_house_per_map()
+            self.init_npc_per_map()
+            self.init_waypoint_per_map()
 
-            y = 700  
-            for houses_nb in self.houses:
-                self.screen.blit(houses_nb.image, houses_nb.rect)
-            for npc_nb in self.npcs:
-                self.screen.blit(npc_nb.image, npc_nb.rect)
-            for waypoints in self.waypoints:
-                self.screen.blit(waypoints.image, waypoints.rect)
-            for text_surface in text_surfaces:
-                self.screen.blit(text_surface, (200, y))
-                y += text_surface.get_height() 
-
+            self.player.show_text()
             self.player.move()
-            self.screen.blit(self.player.frames[self.player.current_direction][self.current_frame], (self.player.rect.x, self.player.rect.y))
-
-            if self.frame_counter == 0:
-                self.current_frame = (self.current_frame + 1) % 9
+            self.show_player()
             self.player.is_end_end()
             
             pygame.display.flip()
