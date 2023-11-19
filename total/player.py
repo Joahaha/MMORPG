@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 from pygame.sprite import AbstractGroup
 from mysprite import mySprite
+from inventory import Inventory
 
 class Player(mySprite):
     def __init__(self,game,speed=6):
@@ -30,25 +31,17 @@ class Player(mySprite):
         self.text=''
         self.voisin=''
         self.quest = False
-        self.on_going_quest = []
+        self.on_going_quest = [None] * 10
         self.gun = False
         self.nb_voisin = self.game.nb_voisins[self.game.current_map]
         self.key = False
         self.temp_x = 0
         self.temp_y = 0
         self.gold = 0
+        self.inventory_open = False
+        self.inventory = Inventory(10, game,self)
 
-
-    def move(self):
-        hit_npc = pygame.sprite.spritecollide(self,self.game.npcs,False)
-        hit_waypoint = pygame.sprite.spritecollide(self, self.game.waypoints,False)
-
-        pressed_keys = pygame.key.get_pressed()
-        if hit_npc:
-            for npc in hit_npc:
-                self.show_interaction(npc)
-        if pressed_keys[K_p]:
-            self.update()
+    def handle_movement(self, pressed_keys):
         if pressed_keys[K_LEFT] and self.rect.x - self.speed > 0 :
             self.rect.x -= self.speed
             self.current_direction = 'left'
@@ -69,11 +62,13 @@ class Player(mySprite):
             self.current_direction = 'down'
             self.check_collision('y', self.game.houses)
             self.check_collision('y', self.game.all_walls)
+    def handle_npc_interaction(self, pressed_keys, hit_npc):
         if pressed_keys[K_e] and hit_npc and self.e_key_released:
             for npc in hit_npc:
                 self.interaction(npc)
             self.e_key_released = False
 
+    def handle_quest_interaction(self, pressed_keys, hit_npc):
         if pressed_keys[K_q] and self.quest == True  :
             for npc in hit_npc:
                 if npc.quest is not None :
@@ -82,16 +77,43 @@ class Player(mySprite):
             for npc in hit_npc:
                 if npc.quest is not None and npc.told_quest == True and npc.quest.status == 'Not started':
                     self.quest_screen(npc)
-
+    def handle_waypoint_interaction(self, pressed_keys, hit_waypoint):
         if pressed_keys[K_e] and hit_waypoint and self.e_key_released and self.go_next: 
-           for waypoint in hit_waypoint:
-               if waypoint.avaiable:
+            for waypoint in hit_waypoint:
+                if waypoint.avaiable:
                     self.e_key_released = False
                     self.update()
+
+
+    def handle_inventory(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_TAB]:
+            self.inventory_open = True
+            self.inventory.display()
+        else:
+            self.inventory_open = False
+    def move(self):
+        hit_npc = pygame.sprite.spritecollide(self,self.game.npcs,False)
+        hit_waypoint = pygame.sprite.spritecollide(self, self.game.waypoints,False)
+
+        pressed_keys = pygame.key.get_pressed()
+        if hit_npc:
+            for npc in hit_npc:
+                self.show_interaction(npc)
+        if pressed_keys[K_p]:
+            self.update()
+
+        self.handle_movement(pressed_keys)
+        self.handle_npc_interaction(pressed_keys, hit_npc)
+        self.handle_quest_interaction(pressed_keys, hit_npc)
+        self.handle_waypoint_interaction(pressed_keys, hit_waypoint)
+        self.handle_inventory()
+
         if not hit_npc and not self.e_key_released:
             self.reset_text()
             self.e_key_released = True
-        if not (pressed_keys[K_LEFT] or pressed_keys[K_RIGHT] or pressed_keys[K_UP] or pressed_keys[K_DOWN]):
+
+        if not any(pressed_keys):
             self.current_direction = 'standing'
         
 
@@ -159,14 +181,15 @@ class Player(mySprite):
         if quest.game_changer:
             for waypoint in self.game.waypoints:
                 waypoint.avaiable = True
-                self.gold += self.quest.reward
+                print(self.gold)
+                self.gold += self.on_going_quest[quest.id].reward
+                print(self.gold)
         self.on_going_quest.remove(quest)
 
     def is_end_end(self):
-        
-        for quests in self.on_going_quest:
-            if quests.condition():
-                self.end_of_quest(quests)
+        for quest in self.on_going_quest:
+            if quest is not None and quest.condition():
+                self.end_of_quest(quest)
 
     def show_quest(self,npc):
         self.text = self.voisin 
@@ -193,9 +216,9 @@ class Player(mySprite):
                 if event.type == pygame.KEYDOWN:  
                     if event.key == pygame.K_SPACE:
                         running = False
-                    elif event.key == pygame.K_y:
-                        npc.quest.start()    
-                        self.on_going_quest.append(npc.quest)
+                    elif event.key == pygame.K_y and npc.quest.status == 'Not started':
+                        npc.quest.start()  
+                        self.on_going_quest[npc.quest.id] = npc.quest
                             
                         for each_npc in self.game.npcs:
                             if each_npc.quest == None:
@@ -213,7 +236,7 @@ class Player(mySprite):
                 self.game.screen.blit(text_surface, (200, y))
                 y += text_surface.get_height() 
 
- 
+
 
     def update(self):
         self.game.clear_npc()

@@ -1,5 +1,5 @@
 class Quest:
-    def __init__(self, name, description, objectives, reward,condition,post_text,holder,game_changer):
+    def __init__(self, name, description, objectives, reward,condition,post_text,holder,game_changer,id):
         self.name = name
         self.description = description
         self.objectives = objectives 
@@ -9,6 +9,7 @@ class Quest:
         self.post_text = post_text
         self.holder = holder
         self.game_changer = game_changer
+        self.id = id
 
     def start(self):
         self.status = 'In progress'

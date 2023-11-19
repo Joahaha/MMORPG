@@ -1,7 +1,6 @@
 import pygame
 from pygame.locals import *
 from pygame.sprite import AbstractGroup
-from mysprite import mySprite
 from player import Player
 from npc import NPC
 from house import House
@@ -9,6 +8,8 @@ from wall_verti import Wall_verti
 from wall_hori import Wall_hori
 from waypoint import Waypoint
 from quest import Quest
+from weapon import Weapon
+from usable_item import Usable_Item
 
 pygame.init()
 pygame.display.set_caption("Joah adventure")
@@ -26,7 +27,8 @@ class Game(pygame.sprite.Sprite):
                             condition = False,
                             post_text = '\nMerci tu peux prendre le téléporteur pour changer de map',
                             holder = NPC,
-                            game_changer = True)
+                            game_changer = True,
+                            id = 0)
         
         self.tab_npc= [((300,240,'Alexandre',['\nJe suis raciste','\nJe suis vraiment raciste','\nJe suis le plus raciste'], 'images/npc_good_2.png',3,self,True,None,self.npc_sounds[1]),
                 (300, 370,'Coco', ['\nJe suis pas raciste'], 'images/npc_good_1.png',1,self,True,None,self.npc_sounds[1]),
@@ -45,7 +47,16 @@ class Game(pygame.sprite.Sprite):
                  (700, 281,'images/house1.png'),
                  (140, 490, 'images/house1.png')),
                  (()),(())]
-       
+        self.weapons = [
+            Weapon("Sword", "Elle coupe bien", 100, 1, self,10),
+            Weapon("Axe", "Et pas le deo", 150, 1, self,15),
+            Weapon("Spear", "il joue pantheon xd", 200, 3, self,20),
+            Weapon("Bow", "Nv jungler de la kc?", 250, 2, self,25),
+        ]
+        self.usable_items = [
+            Usable_Item("Potion", "Elle soigne", 50, 1, self, 10),
+            Usable_Item("Potion_mana", "Elle soigne mana", 50, 1, self, 10),
+        ]
         self.current_map = 0
         self.width = 1000
         self.height = 800
@@ -68,7 +79,7 @@ class Game(pygame.sprite.Sprite):
         self.clock = pygame.time.Clock()
         self.current_frame = 0
         self.frame_counter = 0
-
+        self.muted = False
         self.all_sprites = pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
         self.houses = pygame.sprite.Group()
@@ -167,25 +178,38 @@ class Game(pygame.sprite.Sprite):
         self.all_sprites.add(self.player)
 
     def show_player(self):
-            self.frame_counter = (self.frame_counter + 1) % (self.fps//5)
-            self.screen.blit(self.player.frames[self.player.current_direction][self.current_frame], (self.player.rect.x, self.player.rect.y))
+            if not self.player.inventory_open:
+                self.frame_counter = (self.frame_counter + 1) % (self.fps//5)
+                self.screen.blit(self.player.frames[self.player.current_direction][self.current_frame], (self.player.rect.x, self.player.rect.y))
 
-            if self.frame_counter == 0:
-                self.current_frame = (self.current_frame + 1) % 9
+                if self.frame_counter == 0:
+                    self.current_frame = (self.current_frame + 1) % 9
     def init_music(self):
         pygame.mixer.init()
         pygame.mixer.music.load(self.background_music[self.current_map])
         pygame.mixer.music.play(-1) 
+
+    def mute_sound(self):
+        self.muted = not self.muted
+        pygame.mixer.music.set_volume(0 if self.muted else 1)
+    
+    def check_mute(self, events):
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_m:
+                    self.mute_sound()
+
     def init_game(self):
         running = True
         self.init_music()
         while running:
-            
             dt = self.clock.tick(self.fps)
-            for event in pygame.event.get():
+            events = pygame.event.get()
+            for event in events:
                 if event.type == QUIT:
                     running = False
             
+            self.check_mute(events)
             self.init_walls_per_map()
             self.screen.blit(self.background, (0,0))
              
