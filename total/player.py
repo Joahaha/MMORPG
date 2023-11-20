@@ -40,24 +40,26 @@ class Player(mySprite):
         self.gold = 0
         self.inventory_open = False
         self.inventory = Inventory(10, game,self)
+        self.base_atq = 10
+        self.base_defense = 10 
 
     def handle_movement(self, pressed_keys):
-        if pressed_keys[K_LEFT] and self.rect.x - self.speed > 0 :
+        if pressed_keys[K_q] and self.rect.x - self.speed > 0 :
             self.rect.x -= self.speed
             self.current_direction = 'left'
             self.check_collision('x', self.game.houses)
             self.check_collision('x', self.game.all_walls)
-        if pressed_keys[K_RIGHT] and self.rect.x + self.speed < self.game.width-50 :
+        if pressed_keys[K_d] and self.rect.x + self.speed < self.game.width-50 :
             self.rect.x += self.speed
             self.current_direction = 'right'
             self.check_collision('x', self.game.houses)
             self.check_collision('x', self.game.all_walls)
-        if pressed_keys[K_UP]  and self.rect.y - self.speed > 0:  
+        if pressed_keys[K_z]  and self.rect.y - self.speed > 0:  
             self.rect.y -= self.speed
             self.current_direction = 'up'
             self.check_collision('y', self.game.houses)
             self.check_collision('y', self.game.all_walls)
-        if pressed_keys[K_DOWN] and self.rect.y +self.speed < self.game.height-50 :
+        if pressed_keys[K_s] and self.rect.y +self.speed < self.game.height-50 :
             self.rect.y += self.speed
             self.current_direction = 'down'
             self.check_collision('y', self.game.houses)
@@ -69,7 +71,7 @@ class Player(mySprite):
             self.e_key_released = False
 
     def handle_quest_interaction(self, pressed_keys, hit_npc):
-        if pressed_keys[K_q] and self.quest == True  :
+        if pressed_keys[K_w] and self.quest == True  :
             for npc in hit_npc:
                 if npc.quest is not None :
                     self.show_quest(npc)
@@ -89,7 +91,10 @@ class Player(mySprite):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_TAB]:
             self.inventory_open = True
-            self.inventory.display()
+            self.atq = self.base_atq + self.inventory.current_weapon.damage if self.inventory.current_weapon is not None else self.base_atq
+            self.defense = 0
+            #self.defense = self.base_defense + self.inventory.current_armor.armor if self.inventory.current_weapon is not None else self.base_defense
+            self.inventory.display()    
         else:
             self.inventory_open = False
     def move(self):
@@ -181,9 +186,9 @@ class Player(mySprite):
         if quest.game_changer:
             for waypoint in self.game.waypoints:
                 waypoint.avaiable = True
-                print(self.gold)
-                self.gold += self.on_going_quest[quest.id].reward
-                print(self.gold)
+                self.gold += self.on_going_quest[quest.id].reward[0]
+                self.inventory.add_weapon(self.on_going_quest[quest.id].reward[1])
+                self.inventory.add_item(self.on_going_quest[quest.id].reward[2])
         self.on_going_quest.remove(quest)
 
     def is_end_end(self):

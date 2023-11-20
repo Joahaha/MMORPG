@@ -49,7 +49,7 @@ class NPC(mySprite):
         text = "Press e to "
         text += self.action_names[self.current_id]
         if self.quest is not None and self.told_quest:
-            text += "\nPress q to show quest"
+            text += "\nPress w to show quest"
         self.possible_interaction= text
 
     def next_step(self):

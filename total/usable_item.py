@@ -2,6 +2,6 @@
 from item import Item
 
 class Usable_Item(Item):
-    def __init__(self, name, description, value,rarity,game,usage,):
-        super().__init__(name, description, value,rarity,game)
+    def __init__(self, name, description, value,rarity,path,game,usage,):
+        super().__init__(name, description, value,rarity,path,game)
         self.usage = usage

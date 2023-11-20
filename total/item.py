@@ -1,17 +1,18 @@
 import pygame
 from pygame.locals import *
+from mysprite import mySprite
 
-class Item:
-    def __init__(self, name, description, value,rarity,game):
+class Item(pygame.sprite.Sprite):
+
+    def __init__(self, name, description, value,rarity,path,game):
+        super().__init__()
         self.name = name
         self.description = description
         self.value = value
         self.rarity = rarity
         self.game = game
-
-    def display_info(self):
-        print(f"Name: {self.name}")
-        print(f"Description: {self.description}")
-        print(f"Value: {self.value}")
+        self.image = pygame.image.load(path).convert_alpha()
+        self.rect = self.image.get_rect()
+        
 
     

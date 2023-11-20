@@ -17,13 +17,26 @@ font = pygame.font.Font(None, 30)
 
 class Game(pygame.sprite.Sprite):
     def __init__(self):
+        self.width = 1000
+        self.height = 800
+        self.screen = pygame.display.set_mode((self.width, self.height))
         self.background_music = ['sounds/pokemon_ost_1.mp3','sounds/pokemon_ost_1.mp3','sounds/pokemon_ost_1.mp3']
         self.npc_sounds = ['sounds/npc_talk_1.mp3','sounds/npc_talk_2.mp3','sounds/npc_talk_3.mp3']
-        self.quest= Quest(
+        self.weapons = [
+            Weapon("Sword", "Elle coupe bien", 100, 1,'images/weapons/sword.png', self,10),
+            Weapon("Axe", "Et pas le deo", 150, 2,'images/weapons/axe.png', self,15),
+            Weapon("Spear", "il joue pantheon xd", 200, 3,'images/weapons/spear.png', self,20),
+            Weapon("Bow", "Nv jungler de la kc?", 250, 2,'images/weapons/bow.png', self,25),
+        ]
+        self.usable_items = [
+            Usable_Item("Potion", "Elle soigne", 50, 1,'images/weapons/sword.png', self, 10),
+            Usable_Item("Potion de mana", "Elle soigne mana", 50, 1, 'images/weapons/sword.png',self, 10),
+        ]
+        self.quest= Quest(  
                             name ='Kill everybody',
                             description='Madao en a marre. Il veut que tu tues tout le monde',
                             objectives=['Tuer tout le monde', 'Reparler à Madao après'],
-                            reward= 50,
+                            reward= [50,self.weapons[1],self.usable_items[1]],
                             condition = False,
                             post_text = '\nMerci tu peux prendre le téléporteur pour changer de map',
                             holder = NPC,
@@ -47,20 +60,9 @@ class Game(pygame.sprite.Sprite):
                  (700, 281,'images/house1.png'),
                  (140, 490, 'images/house1.png')),
                  (()),(())]
-        self.weapons = [
-            Weapon("Sword", "Elle coupe bien", 100, 1, self,10),
-            Weapon("Axe", "Et pas le deo", 150, 1, self,15),
-            Weapon("Spear", "il joue pantheon xd", 200, 3, self,20),
-            Weapon("Bow", "Nv jungler de la kc?", 250, 2, self,25),
-        ]
-        self.usable_items = [
-            Usable_Item("Potion", "Elle soigne", 50, 1, self, 10),
-            Usable_Item("Potion_mana", "Elle soigne mana", 50, 1, self, 10),
-        ]
+        
         self.current_map = 0
-        self.width = 1000
-        self.height = 800
-        self.screen = pygame.display.set_mode((self.width, self.height))
+        
         self.tab_npc_map = [[] for _ in range(len(self.tab_npc))]
         self.tab_house_map = [[] for _ in range(len(self.tab_house))]
         self.backgrounds = ['images/background_npc_town.png','images/house_inside.png','images/carte_riviere.png','images/quatre_chemin.png']
@@ -179,7 +181,7 @@ class Game(pygame.sprite.Sprite):
 
     def show_player(self):
             if not self.player.inventory_open:
-                self.frame_counter = (self.frame_counter + 1) % (self.fps//5)
+                self.frame_counter = (self.frame_counter + 1) % (self.fps//8)
                 self.screen.blit(self.player.frames[self.player.current_direction][self.current_frame], (self.player.rect.x, self.player.rect.y))
 
                 if self.frame_counter == 0:
