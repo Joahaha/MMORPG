@@ -29,9 +29,9 @@ class Game(pygame.sprite.Sprite):
             Weapon("Bow", "Nv jungler de la kc?", 250, 2,'images/weapons/bow.png', self,25),
         ]
         self.usable_items = [
-            Usable_Item("Potion", "Elle soigne", 50, 1,'images/weapons/sword.png', self, 10),
-            Usable_Item("Potion de mana", "Elle soigne mana", 50, 1, 'images/weapons/sword.png',self, 10),
-        ]
+        Usable_Item("Potion", "Elle soigne", 50, 1, 'images/weapons/sword.png', self, lambda : setattr(self.player, 'gold', self.player.gold + 10)),
+        Usable_Item("Potion de mana", "Elle soigne mana", 50, 1, 'images/weapons/sword.png', self, lambda : setattr(self.player, 'gold', self.player.gold - 10)),
+                ]
         self.quest= Quest(  
                             name ='Kill everybody',
                             description='Madao en a marre. Il veut que tu tues tout le monde',

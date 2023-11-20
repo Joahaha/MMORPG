@@ -2,22 +2,25 @@ import pygame
 from pygame.locals import *
 from pygame.sprite import AbstractGroup
 
+class ExitLoops(Exception):
+    pass
 class Inventory():
     def __init__(self, size, game, owner):
         self.size = size
         self.game = game
         self.owner = owner
-        self.weapon_tab = []
-        self.usable_item = []
+        self.weapon_tab = [self.game.weapons[1],self.game.weapons[3],self.game.weapons[2]]
+        self.usable_item = [self.game.usable_items[0]]
         self.rarity_tab = [(0,0,0),(0, 255, 0),(255, 0, 0),(0, 0, 255)]
         self.current_weapon = None
         #self.current_armor = None
+        self.selected_item_index = 0
+        self.is_visible = False
 
 
     def add_weapon(self, weapon):
         if len(self.weapon_tab) < self.size:
             self.weapon_tab.append(weapon)
-            self.current_weapon = weapon
 
     def remove_weapon(self, weapon):
         if weapon in self.weapon_tab:
@@ -30,8 +33,25 @@ class Inventory():
     def remove_item(self, item):    
         if item in self.usable_item:
             self.usable_item.remove(item)
+    
+    def handle_input(self, key):
+        if key == K_TAB:
+            self.is_visible = not self.is_visible
+        elif key == K_DOWN and self.selected_item_index is not None:
+            self.selected_item_index = (self.selected_item_index + 1) % len(self.weapon_tab + self.usable_item)
+        elif key == K_UP and self.selected_item_index is not None:
+            self.selected_item_index = (self.selected_item_index - 1) % len(self.weapon_tab + self.usable_item)
+            
+        self.display()
+        
+    def set_as_current_weapon(self, id):
+        self.current_weapon = self.weapon_tab[id]
+        self.weapon_tab[id] = self.current_weapon
+
+
 
     def display(self):
+        
         inventory_surface = pygame.image.load('images/dq_background.png')
         inventory_surface = pygame.transform.scale(inventory_surface,(1000,800))
 
@@ -66,6 +86,44 @@ class Inventory():
             inventory_surface.blit(weapon_image, (10, 200 + i * 60)) 
             color = self.rarity_tab[weapon.rarity]
             pygame.draw.rect(inventory_surface, color, pygame.Rect(10, 200 + i * 60, 50, 50), 2) 
-
+        arrow = pygame.image.load('images/arrow.png')
+        arrow = pygame.transform.scale(arrow, (50, 50))
+        if self.selected_item_index < len(self.weapon_tab):
+            inventory_surface.blit(arrow, (70, 200 + self.selected_item_index * 60))
+        else:
+            inventory_surface.blit(arrow, (240, 200 + (self.selected_item_index - len(self.weapon_tab)) * 60))
+        for i, item in enumerate(self.usable_item):
+            item_image = item.image 
+            item_image = pygame.transform.scale(item_image, (50, 50)) 
+            inventory_surface.blit(item_image, (180, 200 + i * 60)) 
+            color = self.rarity_tab[item.rarity]
+            pygame.draw.rect(inventory_surface, color, pygame.Rect(180, 200 + i * 60, 50, 50), 2)
         self.game.screen.blit(inventory_surface, (0, 0))    
         pygame.display.flip()
+        try:
+            running = True
+            while running:
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN: 
+                        if event.key == pygame.K_DOWN or event.key == pygame.K_UP:
+                            self.handle_input(event.key)
+                        
+                        if event.key == pygame.K_RETURN:
+                            if self.selected_item_index < len(self.weapon_tab):
+                                self.set_as_current_weapon(self.selected_item_index)
+                                self.owner.atq = self.owner.base_atq + self.current_weapon.damage if self.current_weapon is not None else self.owner.base_atq
+                                self.display()
+                        
+                            else:
+                                self.usable_item[self.selected_item_index - len(self.weapon_tab)].use()
+                                self.remove_item(self.usable_item[self.selected_item_index - len(self.weapon_tab)])
+                                print("test")
+                                self.display()
+
+                        if event.key == pygame.K_LEFT:
+                            print("test")
+                            self.is_visible = False
+                            running = False
+                            raise ExitLoops
+        except ExitLoops:
+            pass
