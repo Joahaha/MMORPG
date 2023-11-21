@@ -10,6 +10,7 @@ from waypoint import Waypoint
 from quest import Quest
 from weapon import Weapon
 from usable_item import Usable_Item
+from fake_house import Fake_house
 
 pygame.init()
 pygame.display.set_caption("Joah adventure")
@@ -65,6 +66,7 @@ class Game(pygame.sprite.Sprite):
         
         self.tab_npc_map = [[] for _ in range(len(self.tab_npc))]
         self.tab_house_map = [[] for _ in range(len(self.tab_house))]
+        self.tab_fake_house_map =[[] for _ in range(len(self.tab_house))] 
         self.backgrounds = ['images/background_npc_town.png','images/house_inside.png','images/carte_riviere.png','images/quatre_chemin.png']
         self.background = ''
         self.walls_verti = [(()),
@@ -85,6 +87,7 @@ class Game(pygame.sprite.Sprite):
         self.all_sprites = pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
         self.houses = pygame.sprite.Group()
+        self.fake_houses = pygame.sprite.Group()
         self.all_walls = pygame.sprite.Group()
         self.waypoints =pygame.sprite.Group()
         self.nb_voisins = [5,5,0]
@@ -135,12 +138,19 @@ class Game(pygame.sprite.Sprite):
             self.tab_house_map[self.current_map].append((House(self.tab_house[self.current_map][i][0],
                                                                self.tab_house[self.current_map][i][1],
                                                                self.tab_house[self.current_map][i][2])))
+            self.tab_fake_house_map[self.current_map].append((Fake_house(self.tab_house[self.current_map][i][0]+10,
+                                                               self.tab_house[self.current_map][i][1],
+                                                               self.tab_house[self.current_map][i][2])))        
+            
             self.houses.add(self.tab_house_map[self.current_map][i])
+            self.fake_houses.add(self.tab_fake_house_map[self.current_map][i])
             self.all_sprites.add(self.tab_house_map[self.current_map][i])
     def init_house_per_map(self):
         for houses_nb in self.houses:
                 self.screen.blit(houses_nb.image, houses_nb.rect)
-
+    def init_fake_house_per_map(self):
+        for houses_nb in self.fake_houses:
+                self.screen.blit(houses_nb.image, houses_nb.rect)
     def init_walls(self):
         for i in range(self.nb_walls[self.current_map]):
             self.wall_per_map_verti.append(Wall_verti(self.walls_verti[self.current_map][i][0],
@@ -169,7 +179,7 @@ class Game(pygame.sprite.Sprite):
         self.background = pygame.transform.scale(self.background, (self.width, self.height))
 
     def init_waypoint(self):
-        self.waypoints.add(Waypoint(400,700,'images/waypoint.png'))
+        self.waypoints.add(Waypoint(400,700,'images/waypoint.png',self))
 
     def init_waypoint_per_map(self):
         for waypoints in self.waypoints:
@@ -212,6 +222,7 @@ class Game(pygame.sprite.Sprite):
                     running = False
             
             self.check_mute(events)
+            self.init_fake_house_per_map()
             self.init_walls_per_map()
             self.screen.blit(self.background, (0,0))
              

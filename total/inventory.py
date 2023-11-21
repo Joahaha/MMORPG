@@ -42,20 +42,13 @@ class Inventory():
         elif key == K_UP and self.selected_item_index is not None:
             self.selected_item_index = (self.selected_item_index - 1) % len(self.weapon_tab + self.usable_item)
             
-        self.display()
         
     def set_as_current_weapon(self, id):
         self.current_weapon = self.weapon_tab[id]
         self.weapon_tab[id] = self.current_weapon
 
-
-
-    def display(self):
-        
-        inventory_surface = pygame.image.load('images/dq_background.png')
-        inventory_surface = pygame.transform.scale(inventory_surface,(1000,800))
-
-
+    def help_display(self,inventory_surface):
+            
         if self.current_weapon == None:
             weapon_slot = pygame.image.load('images/weapon_slot.png')
             weapon_slot = pygame.transform.scale(weapon_slot,(50,50))
@@ -88,7 +81,7 @@ class Inventory():
             pygame.draw.rect(inventory_surface, color, pygame.Rect(10, 200 + i * 60, 50, 50), 2) 
         arrow = pygame.image.load('images/arrow.png')
         arrow = pygame.transform.scale(arrow, (50, 50))
-        if self.selected_item_index < len(self.weapon_tab):
+        if self.selected_item_index < len(self.weapon_tab) or len(self.usable_item)==0:
             inventory_surface.blit(arrow, (70, 200 + self.selected_item_index * 60))
         else:
             inventory_surface.blit(arrow, (240, 200 + (self.selected_item_index - len(self.weapon_tab)) * 60))
@@ -100,30 +93,35 @@ class Inventory():
             pygame.draw.rect(inventory_surface, color, pygame.Rect(180, 200 + i * 60, 50, 50), 2)
         self.game.screen.blit(inventory_surface, (0, 0))    
         pygame.display.flip()
-        try:
-            running = True
-            while running:
+
+    def display(self):
+        inventory_surface = pygame.image.load('images/dq_background.png')
+        inventory_surface = pygame.transform.scale(inventory_surface,(1000,800))
+        self.help_display(inventory_surface) 
+        running = True
+        while running:
                 for event in pygame.event.get():
                     if event.type == pygame.KEYDOWN: 
                         if event.key == pygame.K_DOWN or event.key == pygame.K_UP:
                             self.handle_input(event.key)
+                            inventory_surface.blit(pygame.transform.scale(pygame.image.load('images/dq_background.png'),(1000,800)), (0,0))
+                            self.help_display(inventory_surface)
                         
                         if event.key == pygame.K_RETURN:
                             if self.selected_item_index < len(self.weapon_tab):
                                 self.set_as_current_weapon(self.selected_item_index)
                                 self.owner.atq = self.owner.base_atq + self.current_weapon.damage if self.current_weapon is not None else self.owner.base_atq
-                                self.display()
+                                inventory_surface.blit(pygame.transform.scale(pygame.image.load('images/dq_background.png'),(1000,800)), (0,0))
+                                self.help_display(inventory_surface)
                         
                             else:
                                 self.usable_item[self.selected_item_index - len(self.weapon_tab)].use()
                                 self.remove_item(self.usable_item[self.selected_item_index - len(self.weapon_tab)])
-                                print("test")
-                                self.display()
+                                if len(self.usable_item) == 0:
+                                    self.selected_item_index == 0
+                                inventory_surface.blit(pygame.transform.scale(pygame.image.load('images/dq_background.png'),(1000,800)), (0,0))
+                                self.help_display(inventory_surface)
 
                         if event.key == pygame.K_LEFT:
-                            print("test")
                             self.is_visible = False
                             running = False
-                            raise ExitLoops
-        except ExitLoops:
-            pass

@@ -7,5 +7,4 @@ class Usable_Item(Item):
         self.usage = usage
 
     def use(self):
-        print("je")
         self.usage()

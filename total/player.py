@@ -5,7 +5,7 @@ from mysprite import mySprite
 from inventory import Inventory
 
 class Player(mySprite):
-    def __init__(self,game,speed=6):
+    def __init__(self,game,speed=4):
         super().__init__(483,600,'images/mc_sprite_sheet.png')
         self.frame_width = 64
         self.frame_height = 53
@@ -44,26 +44,27 @@ class Player(mySprite):
         self.base_defense = 10 
 
     def handle_movement(self, pressed_keys):
-        if pressed_keys[K_q] and self.rect.x - self.speed > 0 :
-            self.rect.x -= self.speed
-            self.current_direction = 'left'
-            self.check_collision('x', self.game.houses)
-            self.check_collision('x', self.game.all_walls)
-        if pressed_keys[K_d] and self.rect.x + self.speed < self.game.width-50 :
-            self.rect.x += self.speed
-            self.current_direction = 'right'
-            self.check_collision('x', self.game.houses)
-            self.check_collision('x', self.game.all_walls)
-        if pressed_keys[K_z]  and self.rect.y - self.speed > 0:  
-            self.rect.y -= self.speed
-            self.current_direction = 'up'
-            self.check_collision('y', self.game.houses)
-            self.check_collision('y', self.game.all_walls)
-        if pressed_keys[K_s] and self.rect.y +self.speed < self.game.height-50 :
-            self.rect.y += self.speed
-            self.current_direction = 'down'
-            self.check_collision('y', self.game.houses)
-            self.check_collision('y', self.game.all_walls)
+        if not self.inventory_open  :
+            if pressed_keys[K_q] and self.rect.x - self.speed > 0 :
+                self.rect.x -= self.speed
+                self.current_direction = 'left'
+                self.check_collision('x', self.game.fake_houses)
+                self.check_collision('x', self.game.all_walls)
+            if pressed_keys[K_d] and self.rect.x + self.speed < self.game.width-50 :
+                self.rect.x += self.speed
+                self.current_direction = 'right'
+                self.check_collision('x', self.game.fake_houses)
+                self.check_collision('x', self.game.all_walls)
+            if pressed_keys[K_z]  and self.rect.y - self.speed > 0:  
+                self.rect.y -= self.speed
+                self.current_direction = 'up'
+                self.check_collision('y', self.game.fake_houses)
+                self.check_collision('y', self.game.all_walls)
+            if pressed_keys[K_s] and self.rect.y +self.speed < self.game.height-50 :
+                self.rect.y += self.speed
+                self.current_direction = 'down'
+                self.check_collision('y', self.game.fake_houses)
+                self.check_collision('y', self.game.all_walls)
     def handle_npc_interaction(self, pressed_keys, hit_npc):
         if pressed_keys[K_e] and hit_npc and self.e_key_released:
             for npc in hit_npc:
@@ -84,19 +85,18 @@ class Player(mySprite):
             for waypoint in hit_waypoint:
                 if waypoint.avaiable:
                     self.e_key_released = False
-                    self.update()
+                    waypoint.actions()
 
 
-    def handle_inventory(self):
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_TAB]:
-            self.inventory_open = True
-            self.atq = self.base_atq + self.inventory.current_weapon.damage if self.inventory.current_weapon is not None else self.base_atq
-            self.defense = 0
-            #self.defense = self.base_defense + self.inventory.current_armor.armor if self.inventory.current_weapon is not None else self.base_defense
-            self.inventory.display()    
-        else:
-            self.inventory_open = False
+    def handle_inventory(self,pressed_keys):
+        if pressed_keys[K_TAB]:
+                self.inventory_open = True
+                self.atq = self.base_atq + self.inventory.current_weapon.damage if self.inventory.current_weapon is not None else self.base_atq
+                self.defense = 0
+                #self.defense = self.base_defense + self.inventory.current_armor.armor if self.inventory.current_weapon is not None else self.base_defense
+                self.inventory.display()   
+        else :
+            self.inventory_open = False 
     def move(self):
         hit_npc = pygame.sprite.spritecollide(self,self.game.npcs,False)
         hit_waypoint = pygame.sprite.spritecollide(self, self.game.waypoints,False)
@@ -107,12 +107,16 @@ class Player(mySprite):
                 self.show_interaction(npc)
         if pressed_keys[K_p]:
             self.update()
+        if hit_waypoint:
+            for waypoint in hit_waypoint:
+                if waypoint.avaiable:
+                    self.show_interaction(waypoint)
 
         self.handle_movement(pressed_keys)
         self.handle_npc_interaction(pressed_keys, hit_npc)
         self.handle_quest_interaction(pressed_keys, hit_npc)
         self.handle_waypoint_interaction(pressed_keys, hit_waypoint)
-        self.handle_inventory()
+        self.handle_inventory(pressed_keys)
 
         if not hit_npc and not self.e_key_released:
             self.reset_text()
@@ -253,6 +257,16 @@ class Player(mySprite):
         self.game.init_npc()
         self.default()
     
+    def update_before(self):
+        self.game.clear_npc()
+        self.game.clear_house()
+        self.game.current_map-=1
+        self.game.init_background()
+        self.game.init_walls()
+        self.game.init_house()
+        self.game.init_npc()
+        self.default()
+
     def default(self):
         self.go_next = False
         self.text=''
