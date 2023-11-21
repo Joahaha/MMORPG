@@ -42,6 +42,8 @@ class Player(mySprite):
         self.inventory = Inventory(10, game,self)
         self.base_atq = 10
         self.base_defense = 10 
+        self.health = 100
+        self.mana = 100
 
     def handle_movement(self, pressed_keys):
         if not self.inventory_open  :
@@ -245,8 +247,12 @@ class Player(mySprite):
                 self.game.screen.blit(text_surface, (200, y))
                 y += text_surface.get_height() 
 
-
-
+    def attack_monster(self, monster):
+        monster.health -= self.attack_power
+        if monster.health <= 0:
+            print("You have defeated the monster!")
+        else:
+            print("You have attacked the monster! Its health is now {}".format(monster.health))
     def update(self):
         self.game.clear_npc()
         self.game.clear_house()

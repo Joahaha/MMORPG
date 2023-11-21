@@ -62,35 +62,41 @@ class Inventory():
         weapon_names = [weapon.name for weapon in self.weapon_tab]
         item_names = [item.name for item in self.usable_item]
 
-        weapon_text = font.render(f"Weapons: {', '.join(weapon_names)}", True, (255,255,255 ))
-        item_text = font.render(f"Items: {', '.join(item_names)}", True, (255,255,255 ))
-        gold_text = font.render(f"Gold: {self.owner.gold}", True, (255,255,255 ))
-        atq_stat = font.render(f"Atq: {self.owner.atq}", True, (255,255,255 ))
-        def_stat = font.render(f"Def: {self.owner.defense}", True, (255,255,255 ))
+        weapon_text = font.render(f"Weapons: {', '.join(weapon_names)}", True, (135,255,255 ))
+        item_text = font.render(f"Items: {', '.join(item_names)}", True, (135,255,255 ))
+        gold_text = font.render(f"Gold: {self.owner.gold}", True, (135,255,255 ))
+        atq_stat = font.render(f"Atq: {self.owner.atq}", True, (135,255,255 ))
+        def_stat = font.render(f"Def: {self.owner.defense}", True, (135,255,255 ))
+        if self.selected_item_index < len(self.weapon_tab):
+            description = font.render(f"Description : '{self.weapon_tab[self.selected_item_index].description}'", True, (135,255,255 ))
+        else:
+            description = font.render(f"Description :'{self.usable_item[self.selected_item_index - len(self.weapon_tab)].description}'", True,(135,255,255 ))
 
         inventory_surface.blit(weapon_text, (10, 10))
+
         inventory_surface.blit(item_text, (10, 50))
         inventory_surface.blit(gold_text, (10, 90))
         inventory_surface.blit(atq_stat, (10, 130))
         inventory_surface.blit(def_stat, (10, 170))
+        inventory_surface.blit(description, (10, 210))
         for i, weapon in enumerate(self.weapon_tab):
             weapon_image = weapon.image 
             weapon_image = pygame.transform.scale(weapon_image, (50, 50)) 
-            inventory_surface.blit(weapon_image, (10, 200 + i * 60)) 
+            inventory_surface.blit(weapon_image, (10, 250 + i * 60)) 
             color = self.rarity_tab[weapon.rarity]
-            pygame.draw.rect(inventory_surface, color, pygame.Rect(10, 200 + i * 60, 50, 50), 2) 
-        arrow = pygame.image.load('images/arrow.png')
+            pygame.draw.rect(inventory_surface, color, pygame.Rect(10, 250 + i * 60, 50, 50), 2) 
+        arrow = pygame.image.load('images/arrow1.png')
         arrow = pygame.transform.scale(arrow, (50, 50))
-        if self.selected_item_index < len(self.weapon_tab) or len(self.usable_item)==0:
-            inventory_surface.blit(arrow, (70, 200 + self.selected_item_index * 60))
+        if len(self.usable_item)==0 or self.selected_item_index < len(self.weapon_tab)  :
+            inventory_surface.blit(arrow, (70, 250 + self.selected_item_index * 60))
         else:
-            inventory_surface.blit(arrow, (240, 200 + (self.selected_item_index - len(self.weapon_tab)) * 60))
+            inventory_surface.blit(arrow, (240, 250 + (self.selected_item_index - len(self.weapon_tab)) * 60))
         for i, item in enumerate(self.usable_item):
             item_image = item.image 
             item_image = pygame.transform.scale(item_image, (50, 50)) 
-            inventory_surface.blit(item_image, (180, 200 + i * 60)) 
+            inventory_surface.blit(item_image, (180, 250 + i * 60)) 
             color = self.rarity_tab[item.rarity]
-            pygame.draw.rect(inventory_surface, color, pygame.Rect(180, 200 + i * 60, 50, 50), 2)
+            pygame.draw.rect(inventory_surface, color, pygame.Rect(180, 250 + i * 60, 50, 50), 2)
         self.game.screen.blit(inventory_surface, (0, 0))    
         pygame.display.flip()
 
@@ -109,8 +115,12 @@ class Inventory():
                         
                         if event.key == pygame.K_RETURN:
                             if self.selected_item_index < len(self.weapon_tab):
-                                self.set_as_current_weapon(self.selected_item_index)
-                                self.owner.atq = self.owner.base_atq + self.current_weapon.damage if self.current_weapon is not None else self.owner.base_atq
+                                if self.current_weapon is not None and self.current_weapon.name == self.weapon_tab[self.selected_item_index].name:
+                                    self.current_weapon = None
+                                    self.owner.atq = self.owner.base_atq
+                                else:
+                                    self.set_as_current_weapon(self.selected_item_index)
+                                    self.owner.atq = self.owner.base_atq + self.current_weapon.damage if self.current_weapon is not None else self.owner.base_atq
                                 inventory_surface.blit(pygame.transform.scale(pygame.image.load('images/dq_background.png'),(1000,800)), (0,0))
                                 self.help_display(inventory_surface)
                         
@@ -118,7 +128,8 @@ class Inventory():
                                 self.usable_item[self.selected_item_index - len(self.weapon_tab)].use()
                                 self.remove_item(self.usable_item[self.selected_item_index - len(self.weapon_tab)])
                                 if len(self.usable_item) == 0:
-                                    self.selected_item_index == 0
+                                    self.selected_item_index = 0
+
                                 inventory_surface.blit(pygame.transform.scale(pygame.image.load('images/dq_background.png'),(1000,800)), (0,0))
                                 self.help_display(inventory_surface)
 
