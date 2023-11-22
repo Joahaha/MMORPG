@@ -69,8 +69,10 @@ class Inventory():
         def_stat = font.render(f"Def: {self.owner.defense}", True, (135,255,255 ))
         if self.selected_item_index < len(self.weapon_tab):
             description = font.render(f"Description : '{self.weapon_tab[self.selected_item_index].description}'", True, (135,255,255 ))
+            stat_bonus = font.render(f"Stats: '+{self.weapon_tab[self.selected_item_index].damage}damage +{self.weapon_tab[self.selected_item_index].range}range'", True,(135,255,255 ))
         else:
             description = font.render(f"Description :'{self.usable_item[self.selected_item_index - len(self.weapon_tab)].description}'", True,(135,255,255 ))
+            stat_bonus = font.render(f"",True,(135,255,255 ))
 
         inventory_surface.blit(weapon_text, (10, 10))
 
@@ -79,6 +81,7 @@ class Inventory():
         inventory_surface.blit(atq_stat, (10, 130))
         inventory_surface.blit(def_stat, (10, 170))
         inventory_surface.blit(description, (10, 210))
+        inventory_surface.blit(stat_bonus, (400,210))
         for i, weapon in enumerate(self.weapon_tab):
             weapon_image = weapon.image 
             weapon_image = pygame.transform.scale(weapon_image, (50, 50)) 
@@ -121,6 +124,7 @@ class Inventory():
                                 else:
                                     self.set_as_current_weapon(self.selected_item_index)
                                     self.owner.atq = self.owner.base_atq + self.current_weapon.damage if self.current_weapon is not None else self.owner.base_atq
+                                    self.owner.attack_range = 50+ self.current_weapon.range if self.current_weapon is not None else 50
                                 inventory_surface.blit(pygame.transform.scale(pygame.image.load('images/dq_background.png'),(1000,800)), (0,0))
                                 self.help_display(inventory_surface)
                         

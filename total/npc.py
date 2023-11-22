@@ -1,5 +1,6 @@
 from mysprite import mySprite
 import random
+import pygame
 
 
 
@@ -23,8 +24,13 @@ class NPC(mySprite):
         self.talk_sound = talk_sound
         self.health = 100
         self.detection_range = 200
-        self.speed = 1
+        self.speed = 5
         self.is_in_contact = False
+        self.font = pygame.font.Font(None, 25)  
+        self.frame_counter = 0
+        self.target_x = x
+        self.target_y = y
+        
         
 
     def actions(self):
@@ -47,13 +53,14 @@ class NPC(mySprite):
 
     def kill(self):
         if self.quest is None:
+            self.health -= self.game.player.atq
             if self.health <= 0:
                 self.game.all_sprites.remove(self)
                 self.game.npcs.remove(self)
                 self.game.player.nb_voisin -= 1
-            else :
-                self.health -= self.game.player.atq
-        
+           
+    def __delete__(self):
+        print("hi")
 
     def trade(self):
         pass    
@@ -109,3 +116,41 @@ class NPC(mySprite):
 
     def dialogue_next(self):
         self.dialogue_id+=1
+
+    def show_health(self):
+        if self.is_killable:
+            health_text = self.font.render(str(self.health), True, (0, 255, 0)) 
+            self.game.screen.blit(health_text, (self.rect.x +10, self.rect.y +50))  
+
+    def set_random_target(self):
+        self.target_x = random.randint(0, self.game.width)
+        self.target_y = random.randint(0, self.game.height)
+
+    def update(self):
+        self.frame_counter += 1
+        if self.frame_counter >= 20:
+            for npc in self.game.npcs:
+                npc.frame_counter =0
+            if self.target_x is None and self.target_y is None:
+                self.set_random_target()
+            self.frame_counter = 0
+
+        if self.target_x is not None and self.target_y is not None:
+
+            if abs(self.rect.x - self.target_x) <= self.speed:
+                self.rect.x = self.target_x
+            if self.rect.x < self.target_x:
+                self.rect.x += self.speed
+            else:
+                self.rect.x -= self.speed
+
+            if abs(self.rect.y - self.target_y) <= self.speed:
+                self.rect.y = self.target_y
+            elif self.rect.y < self.target_y:
+                self.rect.y += self.speed
+            else:
+                self.rect.y -= self.speed
+        if self.target_x == self.rect.x:
+            self.target_x = None
+        if self.target_y == self.rect.y:
+            self.target_y= None

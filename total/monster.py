@@ -51,7 +51,12 @@ class Monster(mySprite):
         if player.health <= 0:
             self.game.game_over()
         
-
+    def kill(self):
+            if self.health <= 0:
+                self.game.all_sprites.remove(self)
+                self.game.monsters.remove(self)
+                self.game.player.health += 10
+                self.game.player.gold += 10
     def check_attack(self, player):
         player_distance = ((player.rect.x - self.rect.x)**2 + (player.rect.y - self.rect.y)**2)**0.5
         if player_distance < self.attack_range:
@@ -76,5 +81,6 @@ class Monster(mySprite):
             self.current_sprite = (self.current_sprite + 1) % len(self.sprites)
 
         self.frame_counter += 1  
-
+        
         self.show_monster()
+        self.kill()

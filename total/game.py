@@ -12,6 +12,7 @@ from weapon import Weapon
 from usable_item import Usable_Item
 from fake_house import Fake_house
 from monster import Monster
+import random
 
 pygame.init()
 pygame.display.set_caption("Joah adventure")
@@ -25,10 +26,10 @@ class Game(pygame.sprite.Sprite):
         self.background_music = ['sounds/pokemon_ost_1.mp3','sounds/pokemon_ost_1.mp3','sounds/pokemon_ost_1.mp3']
         self.npc_sounds = ['sounds/npc_talk_1.mp3','sounds/npc_talk_2.mp3','sounds/npc_talk_3.mp3']
         self.weapons = [
-            Weapon("Sword", "Elle coupe bien", 100, 1,'images/weapons/sword.png', self,10),
-            Weapon("Axe", "Et pas le deo", 150, 2,'images/weapons/axe.png', self,15),
-            Weapon("Spear", "il joue pantheon xd", 200, 3,'images/weapons/spear.png', self,20),
-            Weapon("Bow", "Nv jungler de la kc?", 250, 2,'images/weapons/bow.png', self,25),
+            Weapon("Sword", "Elle coupe bien", 100, 1,'images/weapons/sword.png', self,10,30),
+            Weapon("Axe", "Et pas le deo", 150, 2,'images/weapons/axe.png', self,15,20),
+            Weapon("Spear", "il joue pantheon xd", 200, 3,'images/weapons/spear.png', self,20,40),
+            Weapon("Bow", "Nv jungler de la kc?", 250, 2,'images/weapons/bow.png', self,25,60),
         ]
         self.usable_items = [
         Usable_Item("Potion de gold", "Elle give 10 gold", 50, 1, 'images/usable_item/potion_gold.png', self, lambda : setattr(self.player, 'gold', self.player.gold + 10)),
@@ -68,7 +69,7 @@ class Game(pygame.sprite.Sprite):
                  (700, 281,'images/house1.png'),
                  (140, 490, 'images/house1.png')),
                  (()),(())]
-        self.tab_monster = [((400,400,'images/monster/monster_test.png',10,10,100,1,self,2),)]
+        self.tab_monster = [((400,400,'images/monster/monster_test.png',10,10,1000,1,self,2),)]
         self.current_map = 0
         
         self.tab_npc_map = [[] for _ in range(len(self.tab_npc))]
@@ -133,10 +134,10 @@ class Game(pygame.sprite.Sprite):
     def init_npc_per_map(self):
         for npc_nb in self.npcs:
                 self.screen.blit(npc_nb.image, npc_nb.rect)
-                npc_nb.bouger()
 
     def clear_npc(self):
         for npc in self.tab_npc_map[self.current_map]:
+            npc.health = 0
             npc.kill() 
         self.tab_npc_map[self.current_map] = [] 
 
@@ -144,6 +145,11 @@ class Game(pygame.sprite.Sprite):
         for i in range(self.nb_maisons[self.current_map]):
             self.tab_house_map[self.current_map][i].kill() 
         self.tab_house_map[self.current_map] = []
+
+    def clear_fake_house(self):
+        for i in range(self.nb_maisons[self.current_map]):
+            self.tab_fake_house_map[self.current_map][i].kill() 
+        self.tab_fake_house_map[self.current_map] = []
 
     def init_house(self):
         for i in range(self.nb_maisons[self.current_map]):
@@ -163,6 +169,8 @@ class Game(pygame.sprite.Sprite):
     def init_fake_house_per_map(self):
         for houses_nb in self.fake_houses:
                 self.screen.blit(houses_nb.image, houses_nb.rect)
+
+
     def init_walls(self):
         for i in range(self.nb_walls[self.current_map]):
             self.wall_per_map_verti.append(Wall_verti(self.walls_verti[self.current_map][i][0],
@@ -201,7 +209,9 @@ class Game(pygame.sprite.Sprite):
         self.player = Player(self)
         self.all_sprites.add(self.player)
 
-
+    def npc_update(self):
+        npc = random.choice(self.tab_npc_map[self.current_map])
+        npc.update()
 
     def show_player(self):
             if not self.player.inventory_open:
@@ -210,6 +220,7 @@ class Game(pygame.sprite.Sprite):
 
                 if self.frame_counter == 0:
                     self.current_frame = (self.current_frame + 1) % 9
+                    
     def init_monster(self):
         for i in range(len(self.tab_monster[self.current_map])):
             self.tab_monster_map[self.current_map].append(Monster(self.tab_monster[self.current_map][i][0],
@@ -248,7 +259,8 @@ class Game(pygame.sprite.Sprite):
     def show_hp(self):
         hp = font.render(str(self.player.health), True, (255, 0, 0))
         self.screen.blit(hp, (800, 700))
-
+        for npc in self.npcs:
+            npc.show_health()
     def show_mana(self):
         mana = font.render(str(self.player.mana), True, (0, 0, 255))
         self.screen.blit(mana, (800, 750))
@@ -261,7 +273,10 @@ class Game(pygame.sprite.Sprite):
         pygame.quit()
         quit()
     
-
+    def show_circle_range(self):
+        if self.player.showing_range:
+            pygame.draw.circle(self.screen, (255, 0, 0), self.player.rect.center, self.player.attack_range, 1)
+    
     def init_game(self):
         running = True
         self.init_music()
@@ -279,6 +294,7 @@ class Game(pygame.sprite.Sprite):
             self.init_walls_per_map()
             self.screen.blit(self.background, (0,0))
 
+            self.show_circle_range()
             self.init_house_per_map()
             self.init_npc_per_map()
             self.init_waypoint_per_map()
@@ -290,6 +306,7 @@ class Game(pygame.sprite.Sprite):
             self.show_weapon()
             self.show_hp()
             self.show_mana()
+            self.npc_update()
             
 
             for monster in self.monsters:

@@ -3,6 +3,7 @@ from pygame.locals import *
 from pygame.sprite import AbstractGroup
 from mysprite import mySprite
 from inventory import Inventory
+import math
 
 class Player(mySprite):
     def __init__(self,game,speed=4):
@@ -47,6 +48,9 @@ class Player(mySprite):
         self.defense = 10
         self.health = 100
         self.mana = 100
+        self.attack_range = 50
+        self.is_attacking = False
+        self.showing_range = False
 
     def handle_movement(self, pressed_keys):
         if not self.inventory_open  :
@@ -100,6 +104,19 @@ class Player(mySprite):
                 self.inventory.display()   
         else :
             self.inventory_open = False 
+
+    def handle_monster(self, pressed_keys):
+        if pressed_keys[K_x]:
+            monster = self.is_monster_in_range(self.attack_range)
+            if monster is not None:
+                self.attack_monster(monster)
+        else:
+            self.is_attacking = False
+    
+    def show_range(self, pressed_keys):
+            if pressed_keys[K_h]:
+                self.showing_range = not self.showing_range
+
     def move(self):
         if self.health > 100:
             self.health = 100
@@ -122,13 +139,15 @@ class Player(mySprite):
             for waypoint in hit_waypoint:
                 if waypoint.avaiable:
                     self.show_interaction(waypoint)
+        
 
         self.handle_movement(pressed_keys)
         self.handle_npc_interaction(pressed_keys, hit_npc)
         self.handle_quest_interaction(pressed_keys, hit_npc)
         self.handle_waypoint_interaction(pressed_keys, hit_waypoint)
         self.handle_inventory(pressed_keys)
-
+        self.handle_monster(pressed_keys)
+        self.show_range(pressed_keys)
         if not hit_npc:
             if not self.e_key_released:
                 self.reset_text()
@@ -263,14 +282,22 @@ class Player(mySprite):
                 y += text_surface.get_height() 
 
     def attack_monster(self, monster):
-        monster.health -= self.attack_power
-        if monster.health <= 0:
-            print("You have defeated the monster!")
-        else:
-            print("You have attacked the monster! Its health is now {}".format(monster.health))
+        monster.health -= self.atq
+        
+
+    def is_monster_in_range(self, range):
+        for monster in self.game.tab_monster_map[self.game.current_map]:
+            dx = self.rect.centerx - monster.rect.centerx
+            dy = self.rect.centery - monster.rect.centery
+            distance = math.sqrt(dx**2 + dy**2)
+            if distance <= range:
+                return monster
+        return None
+
     def update(self):
         self.game.clear_npc()
         self.game.clear_house()
+        self.game.clear_fake_house()
         self.game.current_map+=1
         self.game.init_background()
         self.game.init_walls()
