@@ -33,8 +33,8 @@ class Game(pygame.sprite.Sprite):
         self.usable_items = [
         Usable_Item("Potion de gold", "Elle give 10 gold", 50, 1, 'images/usable_item/potion_gold.png', self, lambda : setattr(self.player, 'gold', self.player.gold + 10)),
         Usable_Item("Potion de gold", "Elle give 20 gold", 50, 1, 'images/usable_item/potion_gold.png', self, lambda : setattr(self.player, 'gold', self.player.gold + 20)),
-        Usable_Item("Potion de HP", "Elle soigne mana", 50, 1, 'images/usable_item/potion_hp.png', self, lambda : setattr(self.player, 'gold', self.player.gold - 10)),
-        Usable_Item("Potion de HP", "Elle soigne mana", 50, 1, 'images/usable_item/potion_hp.png', self, lambda : setattr(self.player, 'gold', self.player.gold - 10)),
+        Usable_Item("Potion de HP", "Elle soigne 10 HP", 50, 1, 'images/usable_item/potion_hp.png', self, lambda : setattr(self.player, 'health', self.player.health + 10)),
+        Usable_Item("Potion de HP", "Elle soigne 50 HP", 50, 1, 'images/usable_item/potion_hp.png', self, lambda : setattr(self.player, 'health', self.player.health + 50)),
         Usable_Item("Potion de mana", "Elle soigne mana", 50, 1, 'images/usable_item/potion_mana.png', self, lambda : setattr(self.player, 'gold', self.player.gold - 10)),
         Usable_Item("Potion de mana", "Elle soigne mana", 50, 1, 'images/usable_item/potion_mana.png', self, lambda : setattr(self.player, 'gold', self.player.gold - 10)),
         Usable_Item("Potion d'arme aléatoire", "Elle soigne mana", 50, 1, 'images/usable_item/potion_weapon.png', self, lambda : setattr(self.player, 'gold', self.player.gold - 10)),
@@ -68,7 +68,7 @@ class Game(pygame.sprite.Sprite):
                  (700, 281,'images/house1.png'),
                  (140, 490, 'images/house1.png')),
                  (()),(())]
-        self.tab_monster = [((400,400,'images/monster/monster_test.png',10,10,100,1,self),)]
+        self.tab_monster = [((400,400,'images/monster/monster_test.png',10,10,100,1,self,2),)]
         self.current_map = 0
         
         self.tab_npc_map = [[] for _ in range(len(self.tab_npc))]
@@ -133,6 +133,7 @@ class Game(pygame.sprite.Sprite):
     def init_npc_per_map(self):
         for npc_nb in self.npcs:
                 self.screen.blit(npc_nb.image, npc_nb.rect)
+                npc_nb.bouger()
 
     def clear_npc(self):
         for npc in self.tab_npc_map[self.current_map]:
@@ -211,7 +212,6 @@ class Game(pygame.sprite.Sprite):
                     self.current_frame = (self.current_frame + 1) % 9
     def init_monster(self):
         for i in range(len(self.tab_monster[self.current_map])):
-            print("Monster update3")
             self.tab_monster_map[self.current_map].append(Monster(self.tab_monster[self.current_map][i][0],
                                                                   self.tab_monster[self.current_map][i][1],
                                                                   self.tab_monster[self.current_map][i][2],
@@ -219,7 +219,8 @@ class Game(pygame.sprite.Sprite):
                                                                   self.tab_monster[self.current_map][i][4],
                                                                   self.tab_monster[self.current_map][i][5],
                                                                   self.tab_monster[self.current_map][i][6],
-                                                                  self.tab_monster[self.current_map][i][7]))
+                                                                  self.tab_monster[self.current_map][i][7],
+                                                                  self.tab_monster[self.current_map][i][8]))
             self.all_sprites.add(self.tab_monster_map[self.current_map][i])
             self.monsters.add(self.tab_monster_map[self.current_map][i])
 
@@ -289,9 +290,9 @@ class Game(pygame.sprite.Sprite):
             self.show_weapon()
             self.show_hp()
             self.show_mana()
+            
 
             for monster in self.monsters:
-                print("Monster update2")
                 monster.update()
 
             pygame.display.flip()

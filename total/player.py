@@ -30,6 +30,7 @@ class Player(mySprite):
         self.go_next = True
         self.text=''
         self.voisin=''
+        self.colide_npc = None
         self.quest = False
         self.on_going_quest = [None] * 10
         self.gun = False
@@ -41,7 +42,9 @@ class Player(mySprite):
         self.inventory_open = False
         self.inventory = Inventory(10, game,self)
         self.base_atq = 10
+        self.atq = 10
         self.base_defense = 10 
+        self.defense = 10
         self.health = 100
         self.mana = 100
 
@@ -93,13 +96,14 @@ class Player(mySprite):
     def handle_inventory(self,pressed_keys):
         if pressed_keys[K_TAB]:
                 self.inventory_open = True
-                self.atq = self.base_atq + self.inventory.current_weapon.damage if self.inventory.current_weapon is not None else self.base_atq
-                self.defense = 0
                 #self.defense = self.base_defense + self.inventory.current_armor.armor if self.inventory.current_weapon is not None else self.base_defense
                 self.inventory.display()   
         else :
             self.inventory_open = False 
     def move(self):
+        if self.health > 100:
+            self.health = 100
+        self.atq = self.base_atq + self.inventory.current_weapon.damage if self.inventory.current_weapon is not None else self.base_atq
         hit_npc = pygame.sprite.spritecollide(self,self.game.npcs,False)
         hit_waypoint = pygame.sprite.spritecollide(self, self.game.waypoints,False)
 
@@ -107,6 +111,11 @@ class Player(mySprite):
         if hit_npc:
             for npc in hit_npc:
                 self.show_interaction(npc)
+                if not npc.is_in_contact:
+                    self.colide_npc = npc
+                    npc.movement_id +=1
+                    npc.is_in_contact = True
+
         if pressed_keys[K_p]:
             self.update()
         if hit_waypoint:
@@ -120,9 +129,15 @@ class Player(mySprite):
         self.handle_waypoint_interaction(pressed_keys, hit_waypoint)
         self.handle_inventory(pressed_keys)
 
-        if not hit_npc and not self.e_key_released:
-            self.reset_text()
-            self.e_key_released = True
+        if not hit_npc:
+            if not self.e_key_released:
+                self.reset_text()
+
+                self.e_key_released = True
+            if self.colide_npc is not None:
+                self.colide_npc.movement_id -= 1
+                self.colide_npc.is_in_contact = False
+                self.colide_npc = None
 
         if not any(pressed_keys):
             self.current_direction = 'standing'

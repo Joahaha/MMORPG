@@ -10,7 +10,7 @@ class Inventory():
         self.game = game
         self.owner = owner
         self.weapon_tab = [self.game.weapons[1],self.game.weapons[3],self.game.weapons[2]]
-        self.usable_item = [self.game.usable_items[0]]
+        self.usable_item = [self.game.usable_items[3]]
         self.rarity_tab = [(0,0,0),(0, 255, 0),(255, 0, 0),(0, 0, 255)]
         self.current_weapon = None
         #self.current_armor = None
