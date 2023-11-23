@@ -13,6 +13,7 @@ from usable_item import Usable_Item
 from fake_house import Fake_house
 from monster import Monster
 import random
+from monster_mele import Monster_melee
 
 pygame.init()
 pygame.display.set_caption("Joah adventure")
@@ -38,8 +39,8 @@ class Game(pygame.sprite.Sprite):
         Usable_Item("Potion de HP", "Elle soigne 50 HP", 50, 1, 'images/usable_item/potion_hp.png', self, lambda : setattr(self.player, 'health', self.player.health + 50)),
         Usable_Item("Potion de mana", "Elle soigne mana", 50, 1, 'images/usable_item/potion_mana.png', self, lambda : setattr(self.player, 'gold', self.player.gold - 10)),
         Usable_Item("Potion de mana", "Elle soigne mana", 50, 1, 'images/usable_item/potion_mana.png', self, lambda : setattr(self.player, 'gold', self.player.gold - 10)),
-        Usable_Item("Potion d'arme aléatoire", "Elle soigne mana", 50, 1, 'images/usable_item/potion_weapon.png', self, lambda : setattr(self.player, 'gold', self.player.gold - 10)),
-        Usable_Item("Potion d'arme aléatoire", "Elle soigne mana", 50, 1, 'images/usable_item/potion_weapon.png', self, lambda : setattr(self.player, 'gold', self.player.gold - 10)),
+        Usable_Item("Potion d'arme aléatoire", "Elle donne une arme aléatoire", 50, 1, 'images/usable_item/potion_weapon.png', self, lambda : self.player.weapon_tab.append(random.choice(self.weapons))),
+        Usable_Item("Potion d'arme aléatoire", "Elle donne une arme aléatoire", 50, 1, 'images/usable_item/potion_weapon.png', self, lambda : self.player.weapon_tab.append(random.choice(self.weapons))),
                 ]
         self.quest= Quest(  
                             name ='Kill everybody',
@@ -69,7 +70,8 @@ class Game(pygame.sprite.Sprite):
                  (700, 281,'images/house1.png'),
                  (140, 490, 'images/house1.png')),
                  (()),(())]
-        self.tab_monster = [((400,400,'images/monster/monster_test.png',10,10,1000,1,self,2),)]
+        self.tab_monster = [(()),(()),((400,400,'images/monster/monster_test.png',30,10,1000,1,self,2),(200,400,'images/monster/monster_test.png',30,10,1000,1,self,1))]
+        self.tab_monster_melee = [(()),(()),((400,400,'images/monster/monster_test.png',30,10,1000,1,self,2),(200,400,'images/monster/monster_test.png',30,10,1000,1,self,1))]
         self.current_map = 0
         
         self.tab_npc_map = [[] for _ in range(len(self.tab_npc))]
@@ -100,6 +102,7 @@ class Game(pygame.sprite.Sprite):
         self.all_walls = pygame.sprite.Group()
         self.waypoints =pygame.sprite.Group()
         self.monsters = pygame.sprite.Group()
+        self.fireballs = pygame.sprite.Group()
         self.nb_voisins = [5,5,0]
         self.nb_maisons = [3,0,0]
         self.nb_walls = [0,2,0]
@@ -204,7 +207,17 @@ class Game(pygame.sprite.Sprite):
     def init_waypoint_per_map(self):
         for waypoints in self.waypoints:
             self.screen.blit(waypoints.image, waypoints.rect)
+        
+    def reset_waypoint(self):
+        for waypoint in self.waypoints:
+            waypoint.kill()
+        self.waypoints = pygame.sprite.Group()
+        self.init_waypoint()
 
+    def init_fireball(self):
+        for fireball in self.fireballs:
+            fireball.update()
+            fireball.draw(self.screen)
     def init_player(self):
         self.player = Player(self)
         self.all_sprites.add(self.player)
@@ -223,7 +236,7 @@ class Game(pygame.sprite.Sprite):
                     
     def init_monster(self):
         for i in range(len(self.tab_monster[self.current_map])):
-            self.tab_monster_map[self.current_map].append(Monster(self.tab_monster[self.current_map][i][0],
+            self.tab_monster_map[self.current_map].append(Monster_melee(self.tab_monster[self.current_map][i][0],
                                                                   self.tab_monster[self.current_map][i][1],
                                                                   self.tab_monster[self.current_map][i][2],
                                                                   self.tab_monster[self.current_map][i][3],
@@ -232,6 +245,20 @@ class Game(pygame.sprite.Sprite):
                                                                   self.tab_monster[self.current_map][i][6],
                                                                   self.tab_monster[self.current_map][i][7],
                                                                   self.tab_monster[self.current_map][i][8]))
+        
+            self.all_sprites.add(self.tab_monster_map[self.current_map][i])
+            self.monsters.add(self.tab_monster_map[self.current_map][i])
+        for i in range(len(self.tab_monster_melee[self.current_map])):
+            self.tab_monster_map[self.current_map].append(Monster_melee(self.tab_monster_melee[self.current_map][i][0],
+                                                                  self.tab_monster_melee[self.current_map][i][1],
+                                                                  self.tab_monster_melee[self.current_map][i][2],
+                                                                  self.tab_monster_melee[self.current_map][i][3],
+                                                                  self.tab_monster_melee[self.current_map][i][4],
+                                                                  self.tab_monster_melee[self.current_map][i][5],
+                                                                  self.tab_monster_melee[self.current_map][i][6],
+                                                                  self.tab_monster_melee[self.current_map][i][7],
+                                                                  self.tab_monster_melee[self.current_map][i][8]))
+        
             self.all_sprites.add(self.tab_monster_map[self.current_map][i])
             self.monsters.add(self.tab_monster_map[self.current_map][i])
 
@@ -252,6 +279,15 @@ class Game(pygame.sprite.Sprite):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_m:
                     self.mute_sound()
+
+    def check_fireball_collision(self):
+        for fireball in self.fireballs:
+            if pygame.sprite.collide_rect(self.player, fireball):
+                self.player.health -= fireball.damage 
+                if self.player.health <= 0:
+                    self.game_over()
+                self.fireballs.remove(fireball)
+                fireball.kill()
     def show_weapon(self):
         if self.player.inventory.current_weapon is not None:
             self.screen.blit(pygame.transform.scale(self.player.inventory.current_weapon.image,(50,50)),(900,700))
@@ -290,6 +326,7 @@ class Game(pygame.sprite.Sprite):
                     running = False
 
             self.check_mute(events)
+            self.check_fireball_collision()
             self.init_fake_house_per_map()
             self.init_walls_per_map()
             self.screen.blit(self.background, (0,0))
@@ -300,6 +337,7 @@ class Game(pygame.sprite.Sprite):
             self.init_waypoint_per_map()
 
             self.player.show_text()
+            self.init_fireball()
             self.player.move()
             self.show_player()
             self.player.is_end_end()

@@ -53,7 +53,7 @@ class NPC(mySprite):
 
     def kill(self):
         if self.quest is None:
-            self.health -= self.game.player.atq
+            self.health -= self.game.player.atq*10
             if self.health <= 0:
                 self.game.all_sprites.remove(self)
                 self.game.npcs.remove(self)

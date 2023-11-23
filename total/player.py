@@ -298,6 +298,7 @@ class Player(mySprite):
         self.game.clear_npc()
         self.game.clear_house()
         self.game.clear_fake_house()
+        self.game.reset_waypoint()
         self.game.current_map+=1
         self.game.init_background()
         self.game.init_walls()
