@@ -53,17 +53,17 @@ class Game(pygame.sprite.Sprite):
                             game_changer = True,
                             id = 0)
         
-        self.tab_npc= [((300,240,'Alexandre',['\nJe suis raciste','\nJe suis vraiment raciste','\nJe suis le plus raciste'], 'images/npc_good_2.png',3,self,True,None,self.npc_sounds[1]),
-                (300, 370,'Coco', ['\nJe suis pas raciste'], 'images/npc_good_1.png',1,self,True,None,self.npc_sounds[1]),
-                (740,150, 'Olivier', ['\nJe suis trop fort en info'], 'images/npc_good_3.png',1,self,True,None,self.npc_sounds[1]),
-                (740,450, 'Martin', ['\nPtn mais qui est olivier'],'images/npc_good_4.png',1,self,True,None,self.npc_sounds[1]),
-                (400,600,'Madao', ['\nIls veulent pas la fermer?'+"\n"],'images/npc_madao_2.png',1,self,False,self.quest,self.npc_sounds[2])),
+        self.tab_npc= [((300,240,'Alexandre',['\nJe suis raciste','\nJe suis vraiment raciste','\nJe suis le plus raciste'], 'images/npc/npc_good_2.png',3,self,True,None,self.npc_sounds[1]),
+                (300, 370,'Coco', ['\nJe suis pas raciste'], 'images/npc/npc_good_1.png',1,self,True,None,self.npc_sounds[1]),
+                (740,150, 'Olivier', ['\nJe suis trop fort en info'], 'images/npc/npc_good_3.png',1,self,True,None,self.npc_sounds[1]),
+                (740,450, 'Martin', ['\nPtn mais qui est olivier'],'images/npc/npc_good_4.png',1,self,True,None,self.npc_sounds[1]),
+                (400,600,'Madao', ['\nIls veulent pas la fermer?'+"\n"],'images/npc/npc_madao_2.png',1,self,False,self.quest,self.npc_sounds[2])),
 
-                ((290,60,'Bob',['\nJe suis gentil'], 'images/npc_bad_1.png',1,self,True,None,self.npc_sounds[1]),
-                (280, 341,'Bobo',[ '\nJe suis pas gentil'], 'images/npc_bad_2.png',1,self,True,None,self.npc_sounds[1]),
-                (660,60, 'Baba :', ['\nJe suis trop fort en sport'], 'images/npc_bad_3.png',1,self,True,None,self.npc_sounds[1]),
-                (740,320, 'Fdp :', ['\nPtn mais qui est bob'],'images/npc_bad_4.png',1,self,True,None,self.npc_sounds[1]),
-                (280,553,'dark_madao :', ['\nYo la team tu veux quoi frr'],'images/npc_madao_1.png',1,self,True,None,self.npc_sounds[1])),
+                ((290,60,'Bob',['\nJe suis gentil'], 'images/npc/npc_bad_1.png',1,self,True,None,self.npc_sounds[1]),
+                (280, 341,'Bobo',[ '\nJe suis pas gentil'], 'images/npc/npc_bad_2.png',1,self,True,None,self.npc_sounds[1]),
+                (660,60, 'Baba :', ['\nJe suis trop fort en sport'], 'images/npc/npc_bad_3.png',1,self,True,None,self.npc_sounds[1]),
+                (740,320, 'Fdp :', ['\nPtn mais qui est bob'],'images/npc/npc_bad_4.png',1,self,True,None,self.npc_sounds[1]),
+                (280,553,'dark_madao :', ['\nYo la team tu veux quoi frr'],'images/npc/npc_madao_1.png',1,self,True,None,self.npc_sounds[1])),
                 (())
                 ]
         self.tab_house = [((140,87,'images/house1.png'),
