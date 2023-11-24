@@ -33,9 +33,7 @@ class Monster(mySprite):
                 self.rect.y += self.speed
             elif self.rect.y > self.game.player.rect.y:
                 self.rect.y -= self.speed
-        else:
-            self.rect.x += random.randint(-self.speed, self.speed)
-            self.rect.y += random.randint(-self.speed, self.speed)
+
 
     def load_sprite_sheet(self, sprite_sheet_path, sprite_size,nb):
         sprite_sheet = pygame.image.load(sprite_sheet_path).convert_alpha()
@@ -60,7 +58,7 @@ class Monster(mySprite):
             if self.health <= 0:
                 self.game.all_sprites.remove(self)
                 self.game.monsters.remove(self)
-                self.tab_monster_map[self.current_map].remove(self)
+                self.game.tab_monster_map[self.game.current_map].remove(self)
                 self.game.player.health += 10
                 self.game.player.gold += 10
     def check_attack(self, player):
@@ -86,8 +84,8 @@ class Monster(mySprite):
         dy = player.rect.y - self.rect.y
         distance = (dx**2 + dy**2)**0.5
         if distance > 0:
-            self.rect.x += self.speed+4 * dx / distance
-            self.rect.y += self.speed +4* dy / distance
+            self.rect.x += self.speed+3 * dx / distance
+            self.rect.y += self.speed +3* dy / distance
 
     def update(self):
         self.move()

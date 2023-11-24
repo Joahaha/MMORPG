@@ -27,10 +27,10 @@ class Game(pygame.sprite.Sprite):
         self.background_music = ['sounds/pokemon_ost_1.mp3','sounds/pokemon_ost_1.mp3','sounds/pokemon_ost_1.mp3']
         self.npc_sounds = ['sounds/npc_talk_1.mp3','sounds/npc_talk_2.mp3','sounds/npc_talk_3.mp3']
         self.weapons = [
-            Weapon("Sword", "Elle coupe bien", 100, 1,'images/weapons/sword.png', self,10,30),
-            Weapon("Axe", "Et pas le deo", 150, 2,'images/weapons/axe.png', self,15,20),
-            Weapon("Spear", "il joue pantheon xd", 200, 3,'images/weapons/spear.png', self,20,40),
-            Weapon("Bow", "Nv jungler de la kc?", 250, 2,'images/weapons/bow.png', self,25,60),
+            Weapon("Sword", "Elle coupe bien", 100, 1,'images/weapons/sword.png', self,20,10),
+            Weapon("Axe", "You can couper du bois easier", 150, 2,'images/weapons/axe.png', self,40,5),
+            Weapon("Spear", "Elle est belle", 200, 3,'images/weapons/spear.png', self,10,30),
+            Weapon("Bow", "Grosse range mais peu de dégats", 250, 2,'images/weapons/bow.png', self,-5,60),
         ]
         self.usable_items = [
         Usable_Item("Potion de gold", "Elle give 10 gold", 50, 1, 'images/usable_item/potion_gold.png', self, lambda : setattr(self.player, 'gold', self.player.gold + 10)),
@@ -70,14 +70,15 @@ class Game(pygame.sprite.Sprite):
                  (700, 281,'images/house1.png'),
                  (140, 490, 'images/house1.png')),
                  (()),(())]
-        self.tab_monster = [(()),(()),((400,400,'images/monster/monster_test.png',30,10,1000,1,self,2),(200,400,'images/monster/monster_test.png',30,10,1000,1,self,1))]
-        self.tab_monster_melee = [(()),(()),((400,400,'images/monster/monster_test.png',30,10,1000,1,self,2),(200,400,'images/monster/monster_test.png',30,10,1000,1,self,1))]
+        self.tab_monster = [((400,400,'images/monster/monster_test.png',30,10,1000,1,self,2),(200,400,'images/monster/monster_test.png',30,10,1000,1,self,1))]
+        self.tab_monster_melee = [((400,400,'images/monster/monster_test.png',30,10,1000,1,self,2),(200,400,'images/monster/monster_test.png',30,10,1000,1,self,1))]
         self.current_map = 0
         
         self.tab_npc_map = [[] for _ in range(len(self.tab_npc))]
         self.tab_house_map = [[] for _ in range(len(self.tab_house))]
         self.tab_fake_house_map =[[] for _ in range(len(self.tab_house))] 
         self.tab_monster_map = [[] for _ in range(len(self.tab_monster))]
+        self.tab_monster_melee_map = [[] for _ in range(len(self.tab_monster_melee))]
         self.backgrounds = ['images/background_npc_town.png','images/house_inside.png','images/carte_riviere.png','images/quatre_chemin.png']
         self.background = ''
         self.walls_verti = [(()),
@@ -236,7 +237,7 @@ class Game(pygame.sprite.Sprite):
                     
     def init_monster(self):
         for i in range(len(self.tab_monster[self.current_map])):
-            self.tab_monster_map[self.current_map].append(Monster_melee(self.tab_monster[self.current_map][i][0],
+            self.tab_monster_map[self.current_map].append(Monster(self.tab_monster[self.current_map][i][0],
                                                                   self.tab_monster[self.current_map][i][1],
                                                                   self.tab_monster[self.current_map][i][2],
                                                                   self.tab_monster[self.current_map][i][3],
@@ -245,11 +246,11 @@ class Game(pygame.sprite.Sprite):
                                                                   self.tab_monster[self.current_map][i][6],
                                                                   self.tab_monster[self.current_map][i][7],
                                                                   self.tab_monster[self.current_map][i][8]))
-        
             self.all_sprites.add(self.tab_monster_map[self.current_map][i])
             self.monsters.add(self.tab_monster_map[self.current_map][i])
+
         for i in range(len(self.tab_monster_melee[self.current_map])):
-            self.tab_monster_map[self.current_map].append(Monster_melee(self.tab_monster_melee[self.current_map][i][0],
+            self.tab_monster_melee_map[self.current_map].append(Monster_melee(self.tab_monster_melee[self.current_map][i][0],
                                                                   self.tab_monster_melee[self.current_map][i][1],
                                                                   self.tab_monster_melee[self.current_map][i][2],
                                                                   self.tab_monster_melee[self.current_map][i][3],
@@ -258,9 +259,8 @@ class Game(pygame.sprite.Sprite):
                                                                   self.tab_monster_melee[self.current_map][i][6],
                                                                   self.tab_monster_melee[self.current_map][i][7],
                                                                   self.tab_monster_melee[self.current_map][i][8]))
-        
-            self.all_sprites.add(self.tab_monster_map[self.current_map][i])
-            self.monsters.add(self.tab_monster_map[self.current_map][i])
+            self.all_sprites.add(self.tab_monster_melee_map[self.current_map][i])
+            self.monsters.add(self.tab_monster_melee_map[self.current_map][i])
 
     def init_monster_per_map(self):
         for monster in self.monsters:
@@ -344,7 +344,7 @@ class Game(pygame.sprite.Sprite):
             self.show_weapon()
             self.show_hp()
             self.show_mana()
-            self.npc_update()
+            #self.npc_update()
             
 
             for monster in self.monsters:

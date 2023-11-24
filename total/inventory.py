@@ -42,13 +42,26 @@ class Inventory():
         elif key == K_UP and self.selected_item_index is not None:
             self.selected_item_index = (self.selected_item_index - 1) % len(self.weapon_tab + self.usable_item)
             
+    def handle_upgrade(self, key):
+        if self.owner.gold >= 100:
+            if key == K_h:
+                self.owner.base_health+=5
+                self.owner.health +=5
+                self.owner.gold -=100
+            if key == K_j:
+                self.owner.base_range+=5
+                self.owner.gold -= 100
+            
         
     def set_as_current_weapon(self, id):
         self.current_weapon = self.weapon_tab[id]
         self.weapon_tab[id] = self.current_weapon
+    
+    
 
     def help_display(self,inventory_surface):
-            
+        if self.owner.health >= self.owner.base_health:
+            self.owner.health = self.owner.base_health
         if self.current_weapon == None:
             weapon_slot = pygame.image.load('images/weapon_slot.png')
             weapon_slot = pygame.transform.scale(weapon_slot,(50,50))
@@ -65,15 +78,17 @@ class Inventory():
         weapon_text = font.render(f"Weapons: {', '.join(weapon_names)}", True, (135,255,255 ))
         item_text = font.render(f"Items: {', '.join(item_names)}", True, (135,255,255 ))
         gold_text = font.render(f"Gold: {self.owner.gold}", True, (135,255,255 ))
-        atq_stat = font.render(f"Atq: {self.owner.atq}", True, (135,255,255 ))
+        atq_stat = font.render(f"Atq: {self.owner.atq}+{self.weapon_tab[self.selected_item_index].damage}", True, (135,255,255 ))
         def_stat = font.render(f"Def: {self.owner.defense}", True, (135,255,255 ))
+        range = font.render(f"Range : '{self.owner.attack_range}+{self.weapon_tab[self.selected_item_index].range}range'", True, (135,255,255 ))
+        hp = font.render(str(self.owner.health), True, (255, 0, 0))
+        mana = font.render(str(self.owner.mana), True, (0, 0, 255))
         if self.selected_item_index < len(self.weapon_tab):
             description = font.render(f"Description : '{self.weapon_tab[self.selected_item_index].description}'", True, (135,255,255 ))
-            stat_bonus = font.render(f"Stats: '+{self.weapon_tab[self.selected_item_index].damage}damage +{self.weapon_tab[self.selected_item_index].range}range'", True,(135,255,255 ))
+    
         else:
             description = font.render(f"Description :'{self.usable_item[self.selected_item_index - len(self.weapon_tab)].description}'", True,(135,255,255 ))
-            stat_bonus = font.render(f"",True,(135,255,255 ))
-
+          
         inventory_surface.blit(weapon_text, (10, 10))
 
         inventory_surface.blit(item_text, (10, 50))
@@ -81,7 +96,9 @@ class Inventory():
         inventory_surface.blit(atq_stat, (10, 130))
         inventory_surface.blit(def_stat, (10, 170))
         inventory_surface.blit(description, (10, 210))
-        inventory_surface.blit(stat_bonus, (400,210))
+        inventory_surface.blit(range, (10, 250))
+        inventory_surface.blit(mana, (800, 750))
+        inventory_surface.blit(hp, (800, 700))
         for i, weapon in enumerate(self.weapon_tab):
             weapon_image = weapon.image 
             weapon_image = pygame.transform.scale(weapon_image, (50, 50)) 
@@ -124,7 +141,7 @@ class Inventory():
                                 else:
                                     self.set_as_current_weapon(self.selected_item_index)
                                     self.owner.atq = self.owner.base_atq + self.current_weapon.damage if self.current_weapon is not None else self.owner.base_atq
-                                    self.owner.attack_range = 50+ self.current_weapon.range if self.current_weapon is not None else 50
+                                    self.owner.attack_range = self.owner.base_range + self.current_weapon.range if self.current_weapon is not None else self.owner.base_range
                                 inventory_surface.blit(pygame.transform.scale(pygame.image.load('images/dq_background.png'),(1000,800)), (0,0))
                                 self.help_display(inventory_surface)
                         
@@ -136,7 +153,11 @@ class Inventory():
 
                                 inventory_surface.blit(pygame.transform.scale(pygame.image.load('images/dq_background.png'),(1000,800)), (0,0))
                                 self.help_display(inventory_surface)
+                        if event.key == pygame.K_j or event.key == pygame.K_h:
+                            self.handle_upgrade(event.key)
+                            inventory_surface.blit(pygame.transform.scale(pygame.image.load('images/dq_background.png'),(1000,800)), (0,0))
+                            self.help_display(inventory_surface)
 
-                        if event.key == pygame.K_LEFT:
+                        if event.key == pygame.K_ESCAPE:
                             self.is_visible = False
                             running = False

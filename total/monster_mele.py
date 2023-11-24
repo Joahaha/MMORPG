@@ -10,3 +10,11 @@ class Monster_melee(Monster):
             if player.health <= 0:
                 self.game.game_over()
             self.attack_cooldown = 60
+
+    def kill(self):
+        if self.health <= 0:
+            self.game.all_sprites.remove(self)
+            self.game.monsters.remove(self)
+            self.game.tab_monster_melee_map[self.game.current_map].remove(self)
+            self.game.player.health += 10
+            self.game.player.gold += 10

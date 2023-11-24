@@ -39,7 +39,7 @@ class Player(mySprite):
         self.key = False
         self.temp_x = 0
         self.temp_y = 0
-        self.gold = 0
+        self.gold = 100
         self.inventory_open = False
         self.inventory = Inventory(10, game,self)
         self.base_atq = 10
@@ -47,29 +47,33 @@ class Player(mySprite):
         self.base_defense = 10 
         self.defense = 10
         self.health = 100
+        self.base_health = 100
         self.mana = 100
-        self.attack_range = 50
+        self.attack_range = 100
+        self.base_range = 100
         self.is_attacking = False
         self.showing_range = False
+        self.modif_speed = speed
+        self.attack_frame = 0
 
     def handle_movement(self, pressed_keys):
         if not self.inventory_open  :
-            if pressed_keys[K_q] and self.rect.x - self.speed > 0 :
+            if pressed_keys[K_LEFT] and self.rect.x - self.speed > 0 :
                 self.rect.x -= self.speed
                 self.current_direction = 'left'
                 self.check_collision('x', self.game.fake_houses)
                 self.check_collision('x', self.game.all_walls)
-            if pressed_keys[K_d] and self.rect.x + self.speed < self.game.width-50 :
+            if pressed_keys[K_RIGHT] and self.rect.x + self.speed < self.game.width-50 :
                 self.rect.x += self.speed
                 self.current_direction = 'right'
                 self.check_collision('x', self.game.fake_houses)
                 self.check_collision('x', self.game.all_walls)
-            if pressed_keys[K_z]  and self.rect.y - self.speed > 0:  
+            if pressed_keys[K_UP]  and self.rect.y - self.speed > 0:  
                 self.rect.y -= self.speed
                 self.current_direction = 'up'
                 self.check_collision('y', self.game.fake_houses)
                 self.check_collision('y', self.game.all_walls)
-            if pressed_keys[K_s] and self.rect.y +self.speed < self.game.height-50 :
+            if pressed_keys[K_DOWN] and self.rect.y +self.speed < self.game.height-50 :
                 self.rect.y += self.speed
                 self.current_direction = 'down'
                 self.check_collision('y', self.game.fake_houses)
@@ -106,20 +110,36 @@ class Player(mySprite):
             self.inventory_open = False 
 
     def handle_monster(self, pressed_keys):
-        if pressed_keys[K_x]:
+        speed = self.speed
+        if pressed_keys[K_a]:
+            self.is_attacking = True
+            
             monster = self.is_monster_in_range(self.attack_range)
+
             if monster is not None:
                 self.attack_monster(monster)
-        else:
+                if self.inventory.current_weapon is not None and self.inventory.current_weapon.name == 'Bow':
+                    
+                    self.speed = self.modif_speed -2
+        else : 
             self.is_attacking = False
     
+    def check_speed(self):
+        if not self.is_attacking:
+            self.attack_frame +=1
+            if self.attack_frame == 10:
+                self.attack_frame = 0
+                self.speed = self.modif_speed
+        
     def show_range(self, pressed_keys):
             if pressed_keys[K_h]:
                 self.showing_range = not self.showing_range
 
     def move(self):
-        if self.health > 100:
-            self.health = 100
+        if self.health > self.base_health:
+            self.health = self.base_health
+        if self.speed <= 0:
+            self.speed = 0
         self.atq = self.base_atq + self.inventory.current_weapon.damage if self.inventory.current_weapon is not None else self.base_atq
         hit_npc = pygame.sprite.spritecollide(self,self.game.npcs,False)
         hit_waypoint = pygame.sprite.spritecollide(self, self.game.waypoints,False)
@@ -148,6 +168,7 @@ class Player(mySprite):
         self.handle_inventory(pressed_keys)
         self.handle_monster(pressed_keys)
         self.show_range(pressed_keys)
+        self.check_speed()
         if not hit_npc:
             if not self.e_key_released:
                 self.reset_text()
@@ -287,10 +308,20 @@ class Player(mySprite):
 
     def is_monster_in_range(self, range):
         for monster in self.game.tab_monster_map[self.game.current_map]:
-            dx = self.rect.centerx - monster.rect.centerx
-            dy = self.rect.centery - monster.rect.centery
+            dx = self.rect.centerx - monster.rect.x
+            dy = self.rect.centery - monster.rect.y
             distance = math.sqrt(dx**2 + dy**2)
+
             if distance <= range:
+
+                return monster
+        for monster in self.game.tab_monster_melee_map[self.game.current_map]:
+            dx = self.rect.centerx - monster.rect.x
+            dy = self.rect.centery - monster.rect.y
+            distance = math.sqrt(dx**2 + dy**2)
+
+            if distance <= range:
+
                 return monster
         return None
 
