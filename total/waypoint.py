@@ -28,3 +28,8 @@ class Waypoint(mySprite):
         text = "Press e to "
         text += self.action_names[self.current_id]
         self.possible_interaction= text
+
+    def kill(self):
+        print("kill")
+        self.game.all_sprites.remove(self)
+        self.game.waypoints.remove(self)

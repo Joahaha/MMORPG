@@ -6,7 +6,7 @@ from inventory import Inventory
 import math
 
 class Player(mySprite):
-    def __init__(self,game,speed=4):
+    def __init__(self,game,speed=6):
         super().__init__(483,600,'images/mc_sprite_sheet.png')
         self.frame_width = 64
         self.frame_height = 53
@@ -245,6 +245,7 @@ class Player(mySprite):
             quest.holder.dialogue[i] = quest.post_text
         quest.holder.quest = None
         if quest.game_changer:
+
             for waypoint in self.game.waypoints:
                 waypoint.avaiable = True
                 self.gold += self.on_going_quest[quest.id].reward[0]
@@ -254,7 +255,8 @@ class Player(mySprite):
 
     def is_end_end(self):
         for quest in self.on_going_quest:
-            if quest is not None and quest.condition():
+            if quest is not None and quest.status == 'Completed':
+
                 self.end_of_quest(quest)
 
     def show_quest(self,npc):
@@ -329,11 +331,15 @@ class Player(mySprite):
         self.game.clear_npc()
         self.game.clear_house()
         self.game.clear_fake_house()
-        self.game.reset_waypoint()
+        self.game.clear_waypoint()
+        print(self.game.waypoints)
         self.game.current_map+=1
         self.game.init_background()
         self.game.init_walls()
         self.game.init_house()
+        print(self.game.waypoints)
+        self.game.init_waypoint()
+        print(self.game.waypoints)
         self.game.init_npc()
         self.default()
     
