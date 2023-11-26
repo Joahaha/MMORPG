@@ -31,6 +31,16 @@ class Quest:
             if objective['name'] == 'Defeat all the the enemy':
                 if self.game.player.nb_voisin == 1:
                     objective['completed'] = True
+            if objective['name'] == 'Find the password to open the chest':
+                if self.holder.game.player.password_found:
+                    objective['completed'] = True
+            if objective['name'] == 'Open the chest and take the key':
+                for item in self.game.player.inventory.unique_item:
+                    if item.name == 'Golden key':
+                        objective['completed'] = True
+            if objective['name'] == 'Kill all the monster':
+                if len(self.game.nb_monsters) == 0:
+                    objective['completed'] = True
 
 
 

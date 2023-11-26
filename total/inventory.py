@@ -11,6 +11,7 @@ class Inventory():
         self.owner = owner
         self.weapon_tab = [self.game.weapons[1],self.game.weapons[3],self.game.weapons[2]]
         self.usable_item = [self.game.usable_items[3]]
+        self.unique_item = []
         self.rarity_tab = [(0,0,0),(0, 255, 0),(255, 0, 0),(0, 0, 255)]
         self.current_weapon = None
         #self.current_armor = None
@@ -42,9 +43,10 @@ class Inventory():
         if key == K_TAB:
             self.is_visible = not self.is_visible
         elif key == K_DOWN and self.selected_item_index is not None:
-            self.selected_item_index = (self.selected_item_index + 1) % len(self.weapon_tab + self.usable_item)
+            self.selected_item_index = (self.selected_item_index + 1) % len(self.weapon_tab + self.usable_item + self.unique_item)
         elif key == K_UP and self.selected_item_index is not None:
-            self.selected_item_index = (self.selected_item_index - 1) % len(self.weapon_tab + self.usable_item)
+            self.selected_item_index = (self.selected_item_index - 1) % len(self.weapon_tab + self.usable_item + self.unique_item)
+
             
     def handle_upgrade(self, key):
         if self.owner.gold >= 100:
@@ -135,6 +137,12 @@ class Inventory():
             inventory_surface.blit(item_image, (180, 290 + i * 60)) 
             color = self.rarity_tab[item.rarity]
             pygame.draw.rect(inventory_surface, color, pygame.Rect(180, 290 + i * 60, 50, 50), 2)
+        for i, unique in enumerate(self.unique_item):
+            unique_image = unique.image 
+            unique_image = pygame.transform.scale(unique_image, (50, 50)) 
+            inventory_surface.blit(unique_image, (290, 290 + i * 60)) 
+            color = self.rarity_tab[item.rarity]
+            pygame.draw.rect(inventory_surface, color, pygame.Rect(290, 290 + i * 60, 50, 50), 2)
         self.game.screen.blit(inventory_surface, (0, 0))    
         pygame.display.flip()
 

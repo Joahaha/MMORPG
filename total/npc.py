@@ -30,6 +30,7 @@ class NPC(mySprite):
         self.frame_counter = 0
         self.target_x = x
         self.target_y = y
+        self.password_found = False
         
         
 

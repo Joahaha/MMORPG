@@ -14,6 +14,7 @@ from fake_house import Fake_house
 from monster import Monster
 import random
 from monster_mele import Monster_melee
+from unique_item import Unique_Item
 
 pygame.init()
 pygame.display.set_caption("Joah adventure")
@@ -42,6 +43,13 @@ class Game(pygame.sprite.Sprite):
         Usable_Item("Potion d'arme aléatoire", "Elle donne une arme aléatoire", 50, 1, 'images/usable_item/potion_weapon.png', self, lambda : self.player.weapon_tab.append(random.choice(self.weapons))),
         Usable_Item("Potion d'arme aléatoire", "Elle donne une arme aléatoire", 50, 1, 'images/usable_item/potion_weapon.png', self, lambda : self.player.weapon_tab.append(random.choice(self.weapons))),
                 ]
+        self.unique_items = [
+            Unique_Item("Golden key", "Elle ouvre le portail", 0, 1, 'images/unique_item/golden_key.png', self),
+            Unique_Item("Monster heart", "Coeur d'un monstre qui apparait une fois par millénaire", 0, 1, 'images/unique_item/monster_heart.png', self),
+            Unique_Item("Ultimate key", "Permet d'accéder à la fin du jeu", 0, 1, 'images/unique_item/ultimate_key.png', self),
+        ]
+
+
         self.quest= Quest(  
                             name ='Kill everybody',
                             description='Madao en a marre. Il veut que tu tues tout le monde',
@@ -51,7 +59,7 @@ class Game(pygame.sprite.Sprite):
                                 'shown': False,
                                 'display_counter': 150,
                             }],
-                            reward= [50,self.weapons[1],self.usable_items[1]],
+                            reward= [50,self.weapons[1],self.usable_items[1],],
                             condition = False,
                             post_text = '\nMerci tu peux prendre le téléporteur pour changer de map',
                             holder = NPC,
@@ -59,6 +67,71 @@ class Game(pygame.sprite.Sprite):
                             id = 0,
                             game = self
                             )
+        self.quest2= Quest(  
+            name ='Retrieve the golden key',
+            description='Retrouve la clé dorée pour ouvrir le portail',
+            objectives = [
+                {
+                    'name': 'Find the password to open the chest',
+                    'completed': False,
+                    'shown': False,
+                    'display_counter': 150,
+                },
+                {
+                    'name': 'Open the chest and take the key',
+                    'completed': False,
+                    'shown': False,
+                    'display_counter': 150,
+                }
+            ],
+            reward= [50,None,None,self.unique_items[0]],
+            condition = False,
+            post_text = '\nMerci tu peux prendre le téléporteur pour changer de map',
+            holder = NPC,
+            game_changer = True,
+            id = 1,
+            game = self
+        )
+        self.quest3= Quest(  
+                            name ='La quête de la forêt',
+                            description='Une armée de monstre est apparu dans la forêt. Va les tuer',
+                            objectives = [{
+                                'name': 'Kill all the monster',
+                                'completed': False,
+                                'shown': False,
+                                'display_counter': 150,
+                            }],
+                            reward= [50,None,None,self.unique_items[1]],
+                            condition = False,
+                            post_text = '\nMerci de m\'avoir débarassé de ces monstres',
+                            holder = NPC,
+                            game_changer = True,
+                            id = 2,
+                            game = self
+                            )
+        self.quest4= Quest(  
+                                name ='Fin du jeu',
+                                description='Recupère le coeur du monstre et la clé en or pour finir le jeu',
+                                objectives = [{
+                                    'name': 'Bring the key and the heart ',
+                                    'completed': False,
+                                    'shown': False,
+                                    'display_counter': 150,
+                                }
+                                ,{
+                                    'name': 'Beat the boss',
+                                    'completed': False,
+                                    'shown': False,
+                                    'display_counter': 150,
+                                }],
+                                reward= [50,None,None,self.unique_items[1]],
+                                condition = False,
+                                post_text = '\nMerci de m\'avoir débarassé de ces monstres',
+                                holder = NPC,
+                                game_changer = True,
+                                id = 3,
+                                game = self
+                                )
         
         self.tab_npc= [((300,240,'Alexandre',['\nJe suis raciste','\nJe suis vraiment raciste','\nJe suis le plus raciste'], 'images/npc/npc_good_2.png',3,self,True,None,self.npc_sounds[1]),
                 (300, 370,'Coco', ['\nTu peux appuyer sur tab pour voir ton inventaire'], 'images/npc/npc_good_1.png',1,self,True,None,self.npc_sounds[1]),
@@ -66,7 +139,9 @@ class Game(pygame.sprite.Sprite):
                 (740,450, 'Martin', ['\nPtn mais qui est olivier'],'images/npc/npc_good_4.png',1,self,True,None,self.npc_sounds[1]),
                 (400,600,'Madao', ['\nIls veulent pas la fermer?'+"\n"],'images/npc/npc_madao_2.png',1,self,False,self.quest,self.npc_sounds[2])),
 
-                (()),
+                ((50,300,'Bob',['\nPrends ce portail pour aller vers la maison hantée'], 'images/npc/npc_bad_1.png',1,self,True,self.quest2,self.npc_sounds[1]),
+                (410, 70,'Bobo',[ '\nIl te faut les deux clés pour prendre ce portail'], 'images/npc/npc_bad_2.png',1,self,True,self.quest4,self.npc_sounds[1]),
+                (860,300,'dark_madao :', ['\nPortail en direction de la forêt du monstre'],'images/npc/npc_good_1.png',1,self,True,self.quest3,self.npc_sounds[1])),
 
                 ((290,60,'Bob',['\nJe suis gentil'], 'images/npc/npc_bad_1.png',1,self,True,None,self.npc_sounds[1]),
                 (280, 341,'Bobo',[ '\nJe suis pas gentil'], 'images/npc/npc_bad_2.png',1,self,True,None,self.npc_sounds[1]),
@@ -94,14 +169,16 @@ class Game(pygame.sprite.Sprite):
         self.backgrounds = ['images/backgrounds/background_npc_town.png','images/backgrounds/crossroad.png','images/backgrounds/house_inside.png','images/backgrounds/quatre_chemin.png']
         self.background = ''
         self.walls_verti = [(()),
+                            ((30, 10,'images/backgrounds/wall.png',150,220)),
                             ((320, 30,'images/backgrounds/wall.png',10,220),(320, 30,'images/backgrounds/wall.png',10,220)),
                             (0,0,'images/border.png')]
         self.walls_hori = [(()),
+                           ((300, 200,'images/backgrounds/wall.png',50,50)),
                            ((215,255,'images/backgrounds/wall.png',650,10),(215,255,'images/backgrounds/wall.png',650,10)),
                            (0,0,'images/backgrounds/border.png')]
         self.wall_per_map_hori = []
         self.wall_per_map_verti = []
-        self.waypoints_tab = [Waypoint(600,700,'images/backgrounds/waypoint.png',self),Waypoint(450,50,'images/backgrounds/waypoint.png',self),Waypoint(450,700,'images/backgrounds/waypoint.png',self),Waypoint(30,370,'images/backgrounds/waypoint.png',self)]
+        self.waypoints_tab = [Waypoint(600,700,'images/backgrounds/waypoint.png',1,self),Waypoint(450,50,'images/backgrounds/waypoint.png',3,self),Waypoint(900,370,'images/backgrounds/waypoint.png',4,self),Waypoint(30,370,'images/backgrounds/waypoint.png',2,self)]
 
         self.fps = 60
         self.clock = pygame.time.Clock()
@@ -116,15 +193,17 @@ class Game(pygame.sprite.Sprite):
         self.waypoints =pygame.sprite.Group()
         self.monsters = pygame.sprite.Group()
         self.fireballs = pygame.sprite.Group()
-        self.nb_voisins = [5,0,5]
-        self.nb_maisons = [3,0,0]
+        self.nb_voisins = [5,3,5,0,0]
+        self.nb_maisons = [3,0,0,0,0]
         self.nb_walls = [0,0,2,0]
-        self.nb_waypoints = [1,3,0]
+        self.nb_waypoints = [1,3,0,0,0]
+        self.nb_monsters = [0,0,2]
         self.completed_objectives = []
         self.init_player()
         self.init_house()
         self.init_npc()
-        self.quest.holder = self.tab_npc_map[0][4] 
+
+
         self.init_walls()
         self.init_waypoint()
         self.init_monster()
@@ -147,8 +226,15 @@ class Game(pygame.sprite.Sprite):
                                          self.tab_npc[self.current_map][i][8],
                                          pygame.mixer.Sound(self.tab_npc[self.current_map][i][9])
                                          ))
+            
             self.npcs.add(self.tab_npc_map[self.current_map][i])
             self.all_sprites.add(self.tab_npc_map[self.current_map][i])
+        if self.current_map == 0:
+                self.quest.holder = self.tab_npc_map[0][4] 
+        if self.current_map == 1:
+                self.quest2.holder = self.tab_npc_map[1][0]
+                self.quest3.holder = self.tab_npc_map[1][2]
+                self.quest4.holder = self.tab_npc_map[1][1]
     def init_npc_per_map(self):
         for npc_nb in self.npcs:
                 self.screen.blit(npc_nb.image, npc_nb.rect)
@@ -221,6 +307,8 @@ class Game(pygame.sprite.Sprite):
     def init_waypoint(self):
         for i in range(self.nb_waypoints[self.current_map]):
             self.waypoints.add(self.waypoints_tab[self.current_map+i])
+            if self.current_map == 1:
+                self.waypoints_tab[self.current_map+i].avaiable = True
 
     def init_waypoint_per_map(self):
         for waypoints in self.waypoints:

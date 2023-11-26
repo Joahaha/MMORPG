@@ -55,6 +55,7 @@ class Player(mySprite):
         self.showing_range = False
         self.modif_speed = speed
         self.attack_frame = 0
+        self.password_found = False
 
     def handle_movement(self, pressed_keys):
         if not self.inventory_open  :
@@ -95,8 +96,10 @@ class Player(mySprite):
                     self.quest_screen(npc)
     def handle_waypoint_interaction(self, pressed_keys, hit_waypoint):
         if pressed_keys[K_e] and hit_waypoint and self.e_key_released and self.go_next: 
+            print("ok")
             for waypoint in hit_waypoint:
                 if waypoint.avaiable:
+                    print("ok2")
                     self.e_key_released = False
                     waypoint.actions()
 
@@ -327,13 +330,13 @@ class Player(mySprite):
                 return monster
         return None
 
-    def update(self):
+    def update(self,destination):
         self.game.clear_npc()
         self.game.clear_house()
         self.game.clear_fake_house()
         self.game.clear_waypoint()
         print(self.game.waypoints)
-        self.game.current_map+=1
+        self.game.current_map = destination
         self.game.init_background()
         self.game.init_walls()
         self.game.init_house()
@@ -354,7 +357,7 @@ class Player(mySprite):
         self.default()
 
     def default(self):
-        self.go_next = False
+        self.go_next = True
         self.text=''
         self.voisin=''
         self.alex = False
