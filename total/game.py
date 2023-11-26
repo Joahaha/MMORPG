@@ -72,16 +72,16 @@ class Game(pygame.sprite.Sprite):
             description='Retrouve la clé dorée pour ouvrir le portail',
             objectives = [
                 {
-                    'name': 'Find the password to open the chest',
+                    'name': 'Find the password',
                     'completed': False,
                     'shown': False,
-                    'display_counter': 150,
+                    'display_counter': 300,
                 },
                 {
-                    'name': 'Open the chest and take the key',
+                    'name': 'Open the chest',
                     'completed': False,
                     'shown': False,
-                    'display_counter': 150,
+                    'display_counter': 300,
                 }
             ],
             reward= [50,None,None,self.unique_items[0]],
@@ -143,11 +143,11 @@ class Game(pygame.sprite.Sprite):
                 (410, 70,'Bobo',[ '\nIl te faut les deux clés pour prendre ce portail'], 'images/npc/npc_bad_2.png',1,self,True,self.quest4,self.npc_sounds[1]),
                 (860,300,'dark_madao :', ['\nPortail en direction de la forêt du monstre'],'images/npc/npc_good_1.png',1,self,True,self.quest3,self.npc_sounds[1])),
 
-                ((290,60,'Bob',['\nJe suis gentil'], 'images/npc/npc_bad_1.png',1,self,True,None,self.npc_sounds[1]),
-                (280, 341,'Bobo',[ '\nJe suis pas gentil'], 'images/npc/npc_bad_2.png',1,self,True,None,self.npc_sounds[1]),
-                (660,60, 'Baba :', ['\nJe suis trop fort en sport'], 'images/npc/npc_bad_3.png',1,self,True,None,self.npc_sounds[1]),
+                ((290,60,'Bob',['\nLe mot de passe est 667'], 'images/npc/npc_bad_1.png',1,self,True,None,self.npc_sounds[1]),
+                (280, 341,'Bobo',[ '\nHmm je connais pas le mdp'], 'images/npc/npc_bad_2.png',1,self,True,None,self.npc_sounds[1]),
+                (660,60, 'Baba :', ['\nLe mot de passe est....','\nje sais pas'], 'images/npc/npc_bad_3.png',2,self,True,None,self.npc_sounds[1]),
                 (740,320, 'Fdp :', ['\nPtn mais qui est bob'],'images/npc/npc_bad_4.png',1,self,True,None,self.npc_sounds[1]),
-                (280,553,'dark_madao :', ['\nYo la team tu veux quoi frr'],'images/npc/npc_madao_1.png',1,self,True,None,self.npc_sounds[1])),
+                (280,553,'dark_madao :', ['\nJe cherche mon clone'],'images/npc/npc_madao_1.png',1,self,True,None,self.npc_sounds[1])),
                 (())
                 ]
         self.tab_house = [((140,87,'images/backgrounds/house1.png'),
@@ -235,6 +235,9 @@ class Game(pygame.sprite.Sprite):
                 self.quest2.holder = self.tab_npc_map[1][0]
                 self.quest3.holder = self.tab_npc_map[1][2]
                 self.quest4.holder = self.tab_npc_map[1][1]
+        if self.current_map == 2:
+            self.tab_npc_map[2][1].password_found = True
+
     def init_npc_per_map(self):
         for npc_nb in self.npcs:
                 self.screen.blit(npc_nb.image, npc_nb.rect)
@@ -242,8 +245,10 @@ class Game(pygame.sprite.Sprite):
     def clear_npc(self):
         for npc in self.tab_npc_map[self.current_map]:
             npc.health = 0
+            npc.quest = None
             npc.kill() 
         self.tab_npc_map[self.current_map] = [] 
+        print(self.tab_npc_map[self.current_map])
 
     def clear_house(self):
         for i in range(self.nb_maisons[self.current_map]):
@@ -421,8 +426,9 @@ class Game(pygame.sprite.Sprite):
             if quest is not None:
                 quest.update_objectives()
                 quest.is_completed()
-                for objective in self.quest.objectives:
+                for objective in quest.objectives:
                     if objective['completed'] and not objective['shown']:
+                        print("display")
                         self.completed_objectives.append(objective)  
 
     def displaye_objective(self):

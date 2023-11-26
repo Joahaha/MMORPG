@@ -335,14 +335,11 @@ class Player(mySprite):
         self.game.clear_house()
         self.game.clear_fake_house()
         self.game.clear_waypoint()
-        print(self.game.waypoints)
         self.game.current_map = destination
         self.game.init_background()
         self.game.init_walls()
         self.game.init_house()
-        print(self.game.waypoints)
         self.game.init_waypoint()
-        print(self.game.waypoints)
         self.game.init_npc()
         self.default()
     

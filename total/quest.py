@@ -28,17 +28,18 @@ class Quest:
     
     def update_objectives(self):
         for objective in self.objectives:
-            if objective['name'] == 'Defeat all the the enemy':
+            if objective['name'] == 'Defeat all the the enemy' and objective['completed'] == False:
                 if self.game.player.nb_voisin == 1:
                     objective['completed'] = True
-            if objective['name'] == 'Find the password to open the chest':
+            if objective['name'] == 'Find the password' and objective['completed'] == False:
                 if self.holder.game.player.password_found:
+                    print("password fou2nd")
                     objective['completed'] = True
-            if objective['name'] == 'Open the chest and take the key':
+            if objective['name'] == 'Open the chest' and objective['completed'] == False:
                 for item in self.game.player.inventory.unique_item:
                     if item.name == 'Golden key':
                         objective['completed'] = True
-            if objective['name'] == 'Kill all the monster':
+            if objective['name'] == 'Kill all the monster' and objective['completed'] == False:
                 if len(self.game.nb_monsters) == 0:
                     objective['completed'] = True
 

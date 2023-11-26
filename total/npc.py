@@ -49,6 +49,9 @@ class NPC(mySprite):
         if self.quest is not None:
             self.game.player.quest = True
             self.told_quest = True
+        if self.password_found:
+            self.game.player.password_found = True
+            print("password found")
         self.game.player.text += self.dialogue [self.dialogue_id]
 
 
@@ -57,6 +60,7 @@ class NPC(mySprite):
             self.health -= self.game.player.atq*10
             if self.health <= 0:
                 self.game.all_sprites.remove(self)
+                print("npc killed")
                 self.game.npcs.remove(self)
                 self.game.player.nb_voisin -= 1
            
