@@ -33,7 +33,6 @@ class Quest:
                     objective['completed'] = True
             if objective['name'] == 'Find the password' and objective['completed'] == False:
                 if self.holder.game.player.password_found:
-                    print("password fou2nd")
                     objective['completed'] = True
             if objective['name'] == 'Open the chest' and objective['completed'] == False:
                 for item in self.game.player.inventory.unique_item:

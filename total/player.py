@@ -34,6 +34,7 @@ class Player(mySprite):
         self.colide_npc = None
         self.quest = False
         self.on_going_quest = [None] * 10
+        self.completed_quest = [None] * 10
         self.gun = False
         self.nb_voisin = self.game.nb_voisins[self.game.current_map]
         self.key = False
@@ -96,12 +97,15 @@ class Player(mySprite):
                     self.quest_screen(npc)
     def handle_waypoint_interaction(self, pressed_keys, hit_waypoint):
         if pressed_keys[K_e] and hit_waypoint and self.e_key_released and self.go_next: 
-            print("ok")
             for waypoint in hit_waypoint:
                 if waypoint.avaiable:
-                    print("ok2")
                     self.e_key_released = False
                     waypoint.actions()
+    def handle_chest_interaction(self,pressed_keys,hit_chest):
+        if pressed_keys[K_e] and hit_chest and self.e_key_released:
+            for chest in hit_chest:
+                self.e_key_released = False
+                chest.open(self)
 
 
     def handle_inventory(self,pressed_keys):
@@ -146,6 +150,7 @@ class Player(mySprite):
         self.atq = self.base_atq + self.inventory.current_weapon.damage if self.inventory.current_weapon is not None else self.base_atq
         hit_npc = pygame.sprite.spritecollide(self,self.game.npcs,False)
         hit_waypoint = pygame.sprite.spritecollide(self, self.game.waypoints,False)
+        hit_chest = pygame.sprite.spritecollide(self,self.game.chests,False)
 
         pressed_keys = pygame.key.get_pressed()
         if hit_npc:
@@ -162,20 +167,22 @@ class Player(mySprite):
             for waypoint in hit_waypoint:
                 if waypoint.avaiable:
                     self.show_interaction(waypoint)
+        if hit_chest:
+            for chest in hit_chest:
+                self.show_interaction(chest)
         
-
         self.handle_movement(pressed_keys)
         self.handle_npc_interaction(pressed_keys, hit_npc)
         self.handle_quest_interaction(pressed_keys, hit_npc)
         self.handle_waypoint_interaction(pressed_keys, hit_waypoint)
         self.handle_inventory(pressed_keys)
         self.handle_monster(pressed_keys)
+        self.handle_chest_interaction(pressed_keys, hit_chest)
         self.show_range(pressed_keys)
         self.check_speed()
-        if not hit_npc:
+        if not hit_npc and not hit_chest:
             if not self.e_key_released:
                 self.reset_text()
-
                 self.e_key_released = True
             if self.colide_npc is not None:
                 self.colide_npc.movement_id -= 1
@@ -254,12 +261,12 @@ class Player(mySprite):
                 self.gold += self.on_going_quest[quest.id].reward[0]
                 self.inventory.add_weapon(self.on_going_quest[quest.id].reward[1])
                 self.inventory.add_item(self.on_going_quest[quest.id].reward[2])
+        self.completed_quest.append(quest)
         self.on_going_quest.remove(quest)
 
     def is_end_end(self):
         for quest in self.on_going_quest:
             if quest is not None and quest.status == 'Completed':
-
                 self.end_of_quest(quest)
 
     def show_quest(self,npc):
@@ -331,16 +338,9 @@ class Player(mySprite):
         return None
 
     def update(self,destination):
-        self.game.clear_npc()
-        self.game.clear_house()
-        self.game.clear_fake_house()
-        self.game.clear_waypoint()
+        self.game.clear_all()
         self.game.current_map = destination
-        self.game.init_background()
-        self.game.init_walls()
-        self.game.init_house()
-        self.game.init_waypoint()
-        self.game.init_npc()
+        self.game.init_all()
         self.default()
     
     def update_before(self):
@@ -362,3 +362,4 @@ class Player(mySprite):
         self.nb_voisin = 5
         self.key = False
         self.quest = False
+        self.e_key_released = True

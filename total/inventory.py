@@ -24,16 +24,18 @@ class Inventory():
 
 
     def add_weapon(self, weapon):
-        if len(self.weapon_tab) < self.size:
-            self.weapon_tab.append(weapon)
+        if weapon is not None:
+            if len(self.weapon_tab) < self.size:
+                self.weapon_tab.append(weapon)
 
     def remove_weapon(self, weapon):
         if weapon in self.weapon_tab:
             self.weapon_tab.remove(weapon)
 
     def add_item(self, item):
-        if len(self.usable_item) < self.size:
-            self.usable_item.append(item)
+        if item is not None:
+            if len(self.usable_item) < self.size:
+                self.usable_item.append(item)
 
     def remove_item(self, item):    
         if item in self.usable_item:
@@ -46,7 +48,7 @@ class Inventory():
             self.selected_item_index = (self.selected_item_index + 1) % len(self.weapon_tab + self.usable_item + self.unique_item)
         elif key == K_UP and self.selected_item_index is not None:
             self.selected_item_index = (self.selected_item_index - 1) % len(self.weapon_tab + self.usable_item + self.unique_item)
-
+    
             
     def handle_upgrade(self, key):
         if self.owner.gold >= 100:
@@ -83,9 +85,11 @@ class Inventory():
     def display_weapons(self,inventory_surface):
         weapon_names = [weapon.name for weapon in self.weapon_tab]
         item_names = [item.name for item in self.usable_item]
+        unique_names = [unique.name for unique in self.unique_item]
 
         weapon_text = self.font.render(f"Weapons: {', '.join(weapon_names)}", True, (135,255,255 ))
         item_text = self.font.render(f"Items: {', '.join(item_names)}", True, (135,255,255 ))
+        unique_text = self.font.render(f"Unique {', '.join(unique_names)}", True, (135,255,255))
         gold_text = self.font.render(f"Gold: {self.owner.gold}", True, (135,255,255 ))
         if self.selected_item_index < len(self.weapon_tab):
             if self.current_weapon is not None and self.current_weapon.name == self.weapon_tab[self.selected_item_index].name:
@@ -106,16 +110,19 @@ class Inventory():
         mana = self.font.render(str(self.owner.mana), True, (0, 0, 255))
         if self.selected_item_index < len(self.weapon_tab):
             description = self.font.render(f"Description : '{self.weapon_tab[self.selected_item_index].description}'", True, (135,255,255 ))
-    
-        else:
+        elif self.selected_item_index < len(self.weapon_tab) + len(self.usable_item):
             description = self.font.render(f"Description :'{self.usable_item[self.selected_item_index - len(self.weapon_tab)].description}'", True,(135,255,255 ))
+        elif self.selected_item_index < len(self.weapon_tab) + len(self.usable_item) + len(self.unique_item):
+            description = self.font.render(f"Description :'{self.unique_item[self.selected_item_index - len(self.weapon_tab)-len(self.usable_item)].description}'", True,(135,255,255 ))
+        else:
+            description = self.font.render("No item selected", True, (135,255,255))
           
         inventory_surface.blit(weapon_text, (10, 10))
-
         inventory_surface.blit(item_text, (10, 50))
-        inventory_surface.blit(gold_text, (10, 90))
-        inventory_surface.blit(atq_stat, (10, 130))
-        inventory_surface.blit(def_stat, (10, 170))
+        inventory_surface.blit(unique_text, (10, 90))
+        inventory_surface.blit(gold_text, (10, 130))
+        inventory_surface.blit(atq_stat, (10, 170))
+        inventory_surface.blit(def_stat, (120, 170))
         inventory_surface.blit(description, (10, 210))
         inventory_surface.blit(range, (10, 250))
         inventory_surface.blit(mana, (800, 750))
@@ -129,8 +136,10 @@ class Inventory():
             pygame.draw.rect(inventory_surface, color, pygame.Rect(10, 290 + i * 60, 50, 50), 2) 
         if len(self.usable_item)==0 or self.selected_item_index < len(self.weapon_tab)  :
             inventory_surface.blit(self.arrow, (70, 290 + self.selected_item_index * 60))
-        else:
+        elif self.selected_item_index < len(self.weapon_tab) + len(self.usable_item):
             inventory_surface.blit(self.arrow, (240, 290 + (self.selected_item_index - len(self.weapon_tab)) * 60))
+        else:
+            inventory_surface.blit(self.arrow, (410, 290 + (self.selected_item_index - len(self.weapon_tab) - len(self.usable_item)) * 60))
         for i, item in enumerate(self.usable_item):
             item_image = item.image 
             item_image = pygame.transform.scale(item_image, (50, 50)) 
@@ -140,9 +149,9 @@ class Inventory():
         for i, unique in enumerate(self.unique_item):
             unique_image = unique.image 
             unique_image = pygame.transform.scale(unique_image, (50, 50)) 
-            inventory_surface.blit(unique_image, (290, 290 + i * 60)) 
+            inventory_surface.blit(unique_image, (350, 290 + i * 60)) 
             color = self.rarity_tab[item.rarity]
-            pygame.draw.rect(inventory_surface, color, pygame.Rect(290, 290 + i * 60, 50, 50), 2)
+            pygame.draw.rect(inventory_surface, color, pygame.Rect(350, 290 + i * 60, 50, 50), 2)
         self.game.screen.blit(inventory_surface, (0, 0))    
         pygame.display.flip()
 
@@ -178,12 +187,14 @@ class Inventory():
                                 inventory_surface.blit(self.game.dq_background, (0,0))
                                 self.help_display(inventory_surface)
                         
-                            else:
+                            elif self.selected_item_index < len(self.weapon_tab)+ len(self.usable_item):
                                 self.usable_item[self.selected_item_index - len(self.weapon_tab)].use()
                                 self.remove_item(self.usable_item[self.selected_item_index - len(self.weapon_tab)])
                                 if len(self.usable_item) == 0:
                                     self.selected_item_index = 0
-
+                                inventory_surface.blit(self.game.dq_background, (0,0))
+                                self.help_display(inventory_surface)
+                            else:
                                 inventory_surface.blit(self.game.dq_background, (0,0))
                                 self.help_display(inventory_surface)
                         if event.key == pygame.K_j or event.key == pygame.K_h:

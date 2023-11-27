@@ -31,6 +31,5 @@ class Waypoint(mySprite):
         self.possible_interaction= text
 
     def kill(self):
-        print("kill")
         self.game.all_sprites.remove(self)
         self.game.waypoints.remove(self)
