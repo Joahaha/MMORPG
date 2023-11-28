@@ -57,11 +57,14 @@ class Inventory():
     def handle_upgrade(self, key):
         if self.owner.gold >= 100:
             if key == K_h:
-                self.owner.base_health+=5
-                self.owner.health +=5
+                self.owner.base_health+=20
+                self.owner.health +=20
                 self.owner.gold -=100
             if key == K_j:
-                self.owner.base_range+=5
+                self.owner.base_range+=10
+                self.owner.gold -= 100
+            if key == K_k:
+                self.owner.base_atq+=10
                 self.owner.gold -= 100
             
     def display_current_quest(self,inventory_surface):
@@ -120,10 +123,15 @@ class Inventory():
             description = self.font.render(f"Description :'{self.unique_item[self.selected_item_index - len(self.weapon_tab)-len(self.usable_item)].description}'", True,(135,255,255 ))
         else:
             description = self.font.render("No item selected", True, (135,255,255))
-          
+        upgrade_text = self.font.render(f"Press h to upgrade health", True, (135,255,255 ))
+        upgrade_text2 = self.font.render(f"Press j to upgrade range", True, (135,255,255 ))
+        upgrade_text3 = self.font.render(f"Press k to upgrade atq", True, (135,255,255 ))
         inventory_surface.blit(weapon_text, (10, 10))
+        inventory_surface.blit(upgrade_text, (700, 10))
         inventory_surface.blit(item_text, (10, 50))
+        inventory_surface.blit(upgrade_text2, (700, 50))
         inventory_surface.blit(unique_text, (10, 90))
+        inventory_surface.blit(upgrade_text3, (700, 90))
         inventory_surface.blit(gold_text, (10, 130))
         inventory_surface.blit(atq_stat, (10, 170))
         inventory_surface.blit(def_stat, (120, 170))
@@ -154,7 +162,6 @@ class Inventory():
             unique_image = unique.image 
             unique_image = pygame.transform.scale(unique_image, (50, 50)) 
             inventory_surface.blit(unique_image, (350, 290 + i * 60)) 
-            color = self.rarity_tab[item.rarity]
             pygame.draw.rect(inventory_surface, color, pygame.Rect(350, 290 + i * 60, 50, 50), 2)
         self.game.screen.blit(inventory_surface, (0, 0))    
         pygame.display.flip()
@@ -201,7 +208,7 @@ class Inventory():
                             else:
                                 inventory_surface.blit(self.game.dq_background, (0,0))
                                 self.help_display(inventory_surface)
-                        if event.key == pygame.K_j or event.key == pygame.K_h:
+                        if event.key == pygame.K_j or event.key == pygame.K_h or event.key == pygame.K_k:
                             self.handle_upgrade(event.key)
                             inventory_surface.blit(self.game.dq_background, (0,0))
                             self.help_display(inventory_surface)

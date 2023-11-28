@@ -57,6 +57,7 @@ class Player(mySprite):
         self.modif_speed = speed
         self.attack_frame = 0
         self.password_found = False
+        self.finished_game = False
 
     def handle_movement(self, pressed_keys):
         if not self.inventory_open  :
@@ -126,8 +127,7 @@ class Player(mySprite):
             if monster is not None:
                 self.attack_monster(monster)
                 if self.inventory.current_weapon is not None and self.inventory.current_weapon.name == 'Bow':
-                    
-                    self.speed = self.modif_speed -2
+                    self.speed = self.modif_speed -4
         else : 
             self.is_attacking = False
     
@@ -165,6 +165,7 @@ class Player(mySprite):
             self.update()
         if hit_waypoint:
             for waypoint in hit_waypoint:
+                waypoint.check_avaiable()
                 if waypoint.avaiable:
                     self.show_interaction(waypoint)
         if hit_chest:
@@ -253,15 +254,11 @@ class Player(mySprite):
     def end_of_quest(self,quest):
         for i in range (quest.holder.max_dialogue):
             quest.holder.dialogue[i] = quest.post_text
+        quest.add_reward(self)
         quest.holder.quest = None
         if quest.game_changer:
-
             for waypoint in self.game.waypoints:
                 waypoint.avaiable = True
-                self.gold += self.on_going_quest[quest.id].reward[0]
-                self.inventory.add_weapon(self.on_going_quest[quest.id].reward[1])
-                self.inventory.add_item(self.on_going_quest[quest.id].reward[2])
-                self.inventory.add_unique(self.on_going_quest[quest.id].reward[3])
         self.completed_quest.append(quest)
         self.on_going_quest.remove(quest)
 

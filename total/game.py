@@ -16,6 +16,7 @@ import random
 from monster_mele import Monster_melee
 from unique_item import Unique_Item
 from chest import Chest
+from boss import Boss
 
 pygame.init()
 pygame.display.set_caption("Joah adventure")
@@ -30,7 +31,7 @@ class Game(pygame.sprite.Sprite):
         self.npc_sounds = ['sounds/npc_talk_1.mp3','sounds/npc_talk_2.mp3','sounds/npc_talk_3.mp3']
         self.weapons = [
             Weapon("Sword", "Elle coupe bien", 100, 1,'images/weapons/sword.png', self,20,10),
-            Weapon("Axe", "You can couper du bois easier", 150, 2,'images/weapons/axe.png', self,40,5),
+            Weapon("Axe", "You can couper du bois easier", 150, 2,'images/weapons/axe.png', self,25,5),
             Weapon("Spear", "Elle est belle", 200, 3,'images/weapons/spear.png', self,10,30),
             Weapon("Bow", "Grosse range mais peu de dégats", 250, 2,'images/weapons/bow.png', self,-5,60),
         ]
@@ -85,7 +86,7 @@ class Game(pygame.sprite.Sprite):
                     'display_counter': 150,
                 }
             ],
-            reward= [50,None,None,self.unique_items[0]],
+            reward= [50,None,None,None],
             condition = False,
             post_text = '\nBonne chance avec le boss final',
             holder = NPC,
@@ -114,7 +115,7 @@ class Game(pygame.sprite.Sprite):
                                 name ='Fin du jeu',
                                 description='Recupère le coeur du monstre et la clé en or pour finir le jeu',
                                 objectives = [{
-                                    'name': 'Bring the key and the heart ',
+                                    'name': 'Bring the key and the heart',
                                     'completed': False,
                                     'shown': False,
                                     'display_counter': 150,
@@ -133,9 +134,15 @@ class Game(pygame.sprite.Sprite):
                                 id = 3,
                                 game = self
                                 )
-        self.chest_tab = [(()),
-                          (()),
-                          ((500, 200,'images/backgrounds/chest.png',[50,None,None,self.unique_items[0]],lambda player : player.password_found,self))]
+        self.chest_tab = [
+            (),
+            (), (500, 200,
+                'images/backgrounds/chest.png',
+                [50, None, None, self.unique_items[0]],
+                lambda player: player.password_found if any(quest is not None and quest.id == 1 for quest in player.on_going_quest) else None,
+                self
+            )
+        ]
 
         self.tab_npc= [((300,240,'Alexandre',['\nJe suis raciste','\nJe suis vraiment raciste','\nJe suis le plus raciste'], 'images/npc/npc_good_2.png',3,self,True,None,self.npc_sounds[1]),
                 (300, 370,'Coco', ['\nTu peux appuyer sur tab pour voir ton inventaire'], 'images/npc/npc_good_1.png',1,self,True,None,self.npc_sounds[1]),
@@ -158,18 +165,30 @@ class Game(pygame.sprite.Sprite):
                  (700, 281,'images/backgrounds/house1.png'),
                  (140, 490, 'images/backgrounds/house1.png')),
                  (()),(()),(())]
-        self.tab_monster = [(()),(()),(()),((30,400,'images/monster/monster_test.png',30,10,1000,1,self,2),(134,230,'images/monster/monster_test.png',30,10,1000,1,self,2))]
-        self.tab_monster_melee = [(()),(()),(()),((400,150,'images/monster/monster_test.png',30,10,1000,1,self,1),(200,400,'images/monster/monster_test.png',30,10,1000,1,self,1))]
+        self.tab_monster = [(()),(()),(()),((30,400,'images/monster/monster_test.png',30,10,1000,1,self,2),(134,230,'images/monster/monster_test.png',30,10,1000,1,self,2)),
+                            ((600,500,'images/npc/npc_madao_1.png',30,10,1000,1,self,None),(700,400,'images/npc/npc_madao_2.png',30,10,1000,1,self,None)),(())]
+        self.tab_monster_melee = [(()),(()),(()),((400,150,'images/monster/monster_test.png',30,10,1000,1,self,1),(200,400,'images/monster/monster_test.png',30,10,1000,1,self,1)),(())]
 
                        
         self.walls_verti = [(()),
                             ((30, 10,'images/backgrounds/wall.png',150,220,self)),
                             ((320, 30,'images/backgrounds/wall.png',10,220,self),(320, 30,'images/backgrounds/wall.png',10,220,self)),
-                            (0,0,'images/border.png')]
+                            (0,0,'images/border.png'),
+                            ((395,269,'images/backgrounds/wall.png',75,70,self),(528,266,'images/backgrounds/wall.png',75,80,self),
+                            (243,273,'images/backgrounds/wall.png',90,75,self),(389,116,'images/backgrounds/wall.png',80,93,self),
+                            (528,114,'images/backgrounds/wall.png',88,90,self), (663,277,'images/backgrounds/wall.png',128,73,self),
+                            (674,226,'images/backgrounds/wall.png',75,36,self),(278,236,'images/backgrounds/wall.png',60,40,self),
+                            (635,160,'images/backgrounds/wall.png',38,50,self), (317,170,'images/backgrounds/wall.png',36,45,self))]
+        
         self.walls_hori = [(()),
                            ((300, 200,'images/backgrounds/wall.png',50,50,self)),
                            ((215,255,'images/backgrounds/wall.png',650,10,self),(215,255,'images/backgrounds/wall.png',650,10,self)),
-                           (0,0,'images/backgrounds/border.png')]
+                           (0,0,'images/backgrounds/border.png'),
+                           ((238,432,'images/backgrounds/wall.png',100,88,self),(395,429,'images/backgrounds/wall.png',65,80,self),
+                            (387,569,'images/backgrounds/wall.png',82,134,self),(258,527,'images/backgrounds/wall.png',81,57,self),
+                            (348,572,'images/backgrounds/wall.png',32,77,self), (528,430,'images/backgrounds/wall.png',67,81,self),
+                            (661,429,'images/backgrounds/wall.png',115,93,self),(527,570,'images/backgrounds/wall.png',85,133,self),
+                            (620,573,'images/backgrounds/wall.png',89,52,self), (660,526,'images/backgrounds/wall.png',69,39,self))]
         
         self.current_map = 0
         
@@ -181,7 +200,7 @@ class Game(pygame.sprite.Sprite):
         self.chest_map = [[] for _ in range(len(self.chest_tab))]
         self.wall_per_map_hori = [[] for _ in range(len(self.walls_hori))]
         self.wall_per_map_verti = [[] for _ in range(len(self.walls_verti))]
-        self.backgrounds = ['images/backgrounds/background_npc_town.png','images/backgrounds/crossroad.png','images/backgrounds/house_inside.png','images/backgrounds/map_monster.png','images/backgrounds/boss_room.png']
+        self.backgrounds = ['images/backgrounds/background_npc_town.png','images/backgrounds/crossroad.png','images/backgrounds/house_inside.png','images/backgrounds/map_monster.png','images/backgrounds/boss_room2.png']
         self.background = ''
 
         self.waypoints_tab = [(Waypoint(600,700,'images/backgrounds/waypoint.png',1,self),
@@ -201,6 +220,7 @@ class Game(pygame.sprite.Sprite):
         self.current_frame = 0
         self.frame_counter = 0
         self.muted = False
+        self.fireball =pygame.image.load('images/fireball.png') 
         self.all_sprites = pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
         self.houses = pygame.sprite.Group()
@@ -212,9 +232,10 @@ class Game(pygame.sprite.Sprite):
         self.chests = pygame.sprite.Group()
         self.nb_voisins = [5,3,5,0,0]
         self.nb_maisons = [3,0,0,0,0]
-        self.nb_walls = [0,0,2,0]
+        self.nb_walls = [0,0,2,0,10]
         self.nb_waypoints = [1,3,1,1,0]
         self.nb_monsters = [0,0,0,2,0]
+        self.nb_boss = [0,0,0,0,1]
         self.nb_chest = [0,0,1,0,0]
         self.completed_objectives = []
         self.init_player()
@@ -302,6 +323,13 @@ class Game(pygame.sprite.Sprite):
         if self.nb_walls[self.current_map] is not []:
             self.wall_per_map_hori[self.current_map] = []
             self.wall_per_map_verti[self.current_map] = []
+    def clear_monster(self):
+        for monster in self.tab_monster_map[self.current_map] if self.tab_monster_map[self.current_map] else []:
+            monster.kill()
+        self.tab_monster_map[self.current_map] = []
+        for monster in self.tab_monster_melee_map[self.current_map] if self.tab_monster_melee_map[self.current_map] else []:
+            monster.kill()
+        self.tab_monster_melee_map[self.current_map] = []
     def init_house(self):
         for i in range(self.nb_maisons[self.current_map]):
             self.tab_house_map[self.current_map].append((House(self.tab_house[self.current_map][i][0],
@@ -357,7 +385,6 @@ class Game(pygame.sprite.Sprite):
         for i in range(self.nb_waypoints[self.current_map]):
             waypoint = self.waypoints_tab[self.current_map][i]
             self.waypoints.add(waypoint)
-            waypoint.avaiable = any(quest is not None and quest.id+1 == self.current_map and quest.status == 'Completed' for quest in self.player.completed_quest)
 
     def init_waypoint_per_map(self):
         for waypoints in self.waypoints:
@@ -388,7 +415,7 @@ class Game(pygame.sprite.Sprite):
                     self.current_frame = (self.current_frame + 1) % 9
                     
     def init_monster(self):
-        for i in range(len(self.tab_monster[self.current_map])):
+        for i in range(self.nb_monsters[self.current_map]):
             self.tab_monster_map[self.current_map].append(Monster(self.tab_monster[self.current_map][i][0],
                                                                   self.tab_monster[self.current_map][i][1],
                                                                   self.tab_monster[self.current_map][i][2],
@@ -401,7 +428,7 @@ class Game(pygame.sprite.Sprite):
             self.all_sprites.add(self.tab_monster_map[self.current_map][i])
             self.monsters.add(self.tab_monster_map[self.current_map][i])
 
-        for i in range(len(self.tab_monster_melee[self.current_map])):
+        for i in range(self.nb_monsters[self.current_map]):
 
             self.tab_monster_melee_map[self.current_map].append(Monster_melee(self.tab_monster_melee[self.current_map][i][0],
                                                                   self.tab_monster_melee[self.current_map][i][1],
@@ -414,6 +441,18 @@ class Game(pygame.sprite.Sprite):
                                                                   self.tab_monster_melee[self.current_map][i][8]))
             self.all_sprites.add(self.tab_monster_melee_map[self.current_map][i])
             self.monsters.add(self.tab_monster_melee_map[self.current_map][i])
+        for i in range(self.nb_boss[self.current_map]):
+            self.tab_monster_map[self.current_map].append(Boss(self.tab_monster[self.current_map][i][0],
+                                                                  self.tab_monster[self.current_map][i][1],
+                                                                  self.tab_monster[self.current_map][i][2],
+                                                                  self.tab_monster[self.current_map][i][3],
+                                                                  self.tab_monster[self.current_map][i][4],
+                                                                  self.tab_monster[self.current_map][i][5],
+                                                                  self.tab_monster[self.current_map][i][6],
+                                                                  self.tab_monster[self.current_map][i][7],
+                                                                  self.tab_monster[self.current_map][i][8]))
+            self.all_sprites.add(self.tab_monster_map[self.current_map][i])
+            self.monsters.add(self.tab_monster_map[self.current_map][i])
 
     def init_monster_per_map(self):
         for monster in self.monsters:
@@ -461,6 +500,14 @@ class Game(pygame.sprite.Sprite):
         pygame.time.wait(1000)
         pygame.quit()
         quit()
+    def won_game(self):
+        self.screen.fill((0,0,0))
+        game_over = self.font.render("gg mgl", True, (255, 0, 0))
+        self.screen.blit(game_over, (400, 400))
+        pygame.display.flip()
+        pygame.time.wait(2000)
+        pygame.quit()
+        quit()
     
     def show_circle_range(self):
         if self.player.showing_range:
@@ -492,6 +539,7 @@ class Game(pygame.sprite.Sprite):
         self.clear_npc()
         self.clear_waypoint()
         self.clear_walls()
+        self.clear_monster()
     
     def init_all(self):
         self.init_background()

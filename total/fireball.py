@@ -5,10 +5,10 @@ class Fireball(pygame.sprite.Sprite):
     def __init__(self, start_pos, target_pos,game, speed,taille,):
         super().__init__() 
         self.rect = pygame.Rect(start_pos, (20, 20))    
-        self.image = pygame.image.load('images/fireball.png') 
+        self.game = game
+        self.image = self.game.fireball
         self.image = pygame.transform.scale(self.image, (taille, taille)) 
         self.damage = 10
-        self.game = game
         self.speed = speed
         dx = target_pos[0] - start_pos[0]
         dy = target_pos[1] - start_pos[1]

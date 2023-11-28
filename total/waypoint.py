@@ -24,11 +24,17 @@ class Waypoint(mySprite):
     def teleport(self):
         self.game.player.update_before()
 
-    
+    def check_avaiable(self):
+        for quest in self.game.player.on_going_quest:
+            if self.game.current_map == 1 and quest is not None and quest.id +1== self.destination:
+                text = "Press e to "
+                text += self.action_names[self.current_id]
+                self.possible_interaction= text
+                self.avaiable = True
     def show_interaction(self):
         if self.destination == 4:
             completed_quest_ids = [quest.id for quest in self.game.player.completed_quest if quest is not None]
-            if 2 in completed_quest_ids and 3 in completed_quest_ids:
+            if 1 in completed_quest_ids and 2 in completed_quest_ids:
                 self.avaiable = True
                 text = "Press e to fight the boss "
                 self.possible_interaction= text
