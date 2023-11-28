@@ -261,6 +261,7 @@ class Player(mySprite):
                 self.gold += self.on_going_quest[quest.id].reward[0]
                 self.inventory.add_weapon(self.on_going_quest[quest.id].reward[1])
                 self.inventory.add_item(self.on_going_quest[quest.id].reward[2])
+                self.inventory.add_unique(self.on_going_quest[quest.id].reward[3])
         self.completed_quest.append(quest)
         self.on_going_quest.remove(quest)
 

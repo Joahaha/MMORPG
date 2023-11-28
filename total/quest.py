@@ -39,7 +39,7 @@ class Quest:
                     if item.name == 'Golden key':
                         objective['completed'] = True
             if objective['name'] == 'Kill all the monster' and objective['completed'] == False:
-                if len(self.game.nb_monsters) == 0:
+                if (self.game.nb_monsters[self.game.current_map]) == 0:
                     objective['completed'] = True
 
 

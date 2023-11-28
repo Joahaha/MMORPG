@@ -49,7 +49,10 @@ class Monster(mySprite):
     
     def attack_player(self, player):
         if self.attack_cooldown == 0:
-            fireball = Fireball(self.rect.topleft, player.rect.center, self.game)
+            if self.health < 500:
+                 fireball = Fireball(self.rect.topleft, player.rect.center, self.game,10,40)
+            else:
+                fireball = Fireball(self.rect.topleft, player.rect.center, self.game,10,20)
             self.game.fireballs.add(fireball)
             self.attack_cooldown = 60
 

@@ -36,6 +36,10 @@ class Inventory():
         if item is not None:
             if len(self.usable_item) < self.size:
                 self.usable_item.append(item)
+    def add_unique(self, unique):
+        if unique is not None:
+            if len(self.unique_item) < self.size:
+                self.unique_item.append(unique)
 
     def remove_item(self, item):    
         if item in self.usable_item:

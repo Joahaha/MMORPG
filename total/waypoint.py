@@ -26,9 +26,20 @@ class Waypoint(mySprite):
 
     
     def show_interaction(self):
-        text = "Press e to "
-        text += self.action_names[self.current_id]
-        self.possible_interaction= text
+        if self.destination == 4:
+            completed_quest_ids = [quest.id for quest in self.game.player.completed_quest if quest is not None]
+            if 2 in completed_quest_ids and 3 in completed_quest_ids:
+                self.avaiable = True
+                text = "Press e to fight the boss "
+                self.possible_interaction= text
+            else:
+                text = "You need to complete the quests first"
+                self.possible_interaction= text
+                self.avaiable = False
+        else:
+            text = "Press e to "
+            text += self.action_names[self.current_id]
+            self.possible_interaction= text
 
     def kill(self):
         self.game.all_sprites.remove(self)
