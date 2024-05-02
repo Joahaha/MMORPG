@@ -45,3 +45,4 @@ class Boss(Monster):
     def update(self):
         super().update() 
         self.summon_minions() 
+        self.summon_cooldown-=1

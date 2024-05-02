@@ -1,21 +1,29 @@
+import sys
+sys.path.insert(0, '/autofs/unitytravail/travail/jemy/Perso/MMORPG/total/src/decor')
+sys.path.insert(0, '/autofs/unitytravail/travail/jemy/Perso/MMORPG/total/src/player')
+sys.path.insert(0, '/autofs/unitytravail/travail/jemy/Perso/MMORPG/total/src/npc')
+sys.path.insert(0, '/autofs/unitytravail/travail/jemy/Perso/MMORPG/total/src/items')
+
+
+
 import pygame
 from pygame.locals import *
 from pygame.sprite import AbstractGroup
-from player import Player
+from src.player.player import Player
 from npc import NPC
-from house import House
+from src.decor.house import House
 from wall_verti import Wall_verti
 from wall_hori import Wall_hori
 from waypoint import Waypoint
-from quest import Quest
+from src.player.quest import Quest
 from weapon import Weapon
 from usable_item import Usable_Item
-from fake_house import Fake_house
+from src.decor.fake_house import Fake_house
 from monster import Monster
 import random
 from monster_mele import Monster_melee
 from unique_item import Unique_Item
-from chest import Chest
+from src.decor.chest import Chest
 from boss import Boss
 
 pygame.init()
